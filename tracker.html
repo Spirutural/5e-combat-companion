@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>5e Combat Companion</title>
+  <title>Material Companion</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
@@ -206,6 +206,7 @@
 
     /* === STAT BLOCK PANEL (floating) === */
     #stat-panel {
+      display: none;
       position: fixed;
       right: 20px;
       bottom: 20px;
@@ -910,7 +911,7 @@
   </div>
   <div id="stat-panel">
     <div id="stat-titlebar">
-      <span class="stat-panel-title">Stat Block Viewer</span>
+      <span class="stat-panel-title">Material Companion</span>
       <button id="stat-scrolldown-btn" onclick="scrollToViewerZone()" title="Scroll to viewer space"
         style="background:none;border:1px solid #1a3a4a;color:#4a7a8a;width:20px;height:20px;
                font-size:0.8rem;cursor:pointer;border-radius:3px;display:flex;align-items:center;
@@ -1508,6 +1509,7 @@
           <button onclick="longRest()">Long Rest</button>
         </div>
       </div>
+      <button class="formula-dropdown-btn" onclick="toggleStatPanel()" title="${statVisible ? 'Hide' : 'Show'} material viewer" style="margin-left:4px;">${statVisible ? 'Materials ✕' : 'Materials'}</button>
       <div class="formula-dropdown-wrap">
         <button class="formula-dropdown-btn" onclick="toggleFormulaPanel(); event.stopPropagation();">Formulas ▾</button>
         <div class="formula-panel" id="formula-panel">
@@ -1770,8 +1772,15 @@
   }
 
   // === STAT PANEL — FLOATING / DRAG / MINIMIZE ===
+  let statVisible = false;
   let statMinimized = false;
   let statPinned = false;
+
+  function toggleStatPanel() {
+    statVisible = !statVisible;
+    document.getElementById('stat-panel').style.display = statVisible ? 'flex' : 'none';
+    renderHeader();
+  }
   let draggingPanel = false;
   let dragOffsetX = 0, dragOffsetY = 0;
   let colDragState = null;
