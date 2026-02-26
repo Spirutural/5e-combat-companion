@@ -162,6 +162,22 @@
     .pip.full  { background: #2ab8d0; box-shadow: 0 0 5px #2ab8d060; }
     .pip.empty { background: #0a1e2a; }
     .pip:hover { transform: scale(1.2); }
+    /* === PROFICIENCY PIPS === */
+    .prof-pip {
+      width: 11px; height: 11px;
+      border-radius: 50%;
+      border: 1.5px solid #2a6a7a;
+      background: #0a1e2a;
+      cursor: pointer; flex-shrink: 0;
+      transition: all 0.15s;
+      display: inline-block;
+    }
+    .prof-pip:hover { transform: scale(1.25); }
+    .prof-pip.prof { background: #2ab8d0; border-color: #2ab8d0; }
+    .prof-pip.expertise {
+      background: #2ab8d0; border-color: #2ab8d0;
+      box-shadow: 0 0 0 2px #050d14, 0 0 0 4px #2ab8d0;
+    }
     .rest-buttons { display: flex; gap: 8px; margin-top: 8px; }
     .btn-rest {
       flex: 1;
@@ -1099,6 +1115,7 @@
     attunementMax: 3,
     attunedOpen: true,
     statusOpen: true,
+    saveProfs: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 },
   };
 
   const STORAGE_KEY = '5e_tracker_v1';
@@ -1147,6 +1164,7 @@
   if (state.characterName === undefined) state.characterName = 'Character';
   if (state.statusOpen === undefined) state.statusOpen = true;
   if (state.layout.rightW < 340) state.layout.rightW = 360;
+  if (!state.saveProfs) state.saveProfs = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 };
   function update(mutatorFn) {
     mutatorFn(state);
     saveState();
@@ -1303,11 +1321,20 @@
       <hr class="divider">
       ${sectionTitle('Saves', 'saves')}
       <div class="saves-grid">
-        ${[['STR','savStr'],['DEX','savDex'],['CON','savCon'],['INT','savInt'],['WIS','savWis'],['CHA','savCha']].map(([name, key]) =>
-          isSaves
+        ${[['STR','savStr','str'],['DEX','savDex','dex'],['CON','savCon','con'],['INT','savInt','int'],['WIS','savWis','wis'],['CHA','savCha','cha']].map(([name, key, abKey]) => {
+          const pipState = state.saveProfs[abKey];
+          const pipCls = pipState === 2 ? 'expertise' : pipState === 1 ? 'prof' : '';
+          const pipTitle = ['Not proficient', 'Proficient', 'Expertise'][pipState];
+          return isSaves
             ? `<div class="save-row"><span class="save-name">${name}</span><input class="edit-input-sm" id="edit-${key}" type="number" value="${st[key]}"></div>`
-            : `<div class="save-row"><span class="save-name">${name}</span><span class="save-val editable-stat" onclick="editStat('${key}')" title="Click to edit">+${st[key]}</span></div>`
-        ).join('')}
+            : `<div class="save-row">
+                <span style="display:flex;align-items:center;gap:4px;">
+                  <span class="prof-pip ${pipCls}" onclick="cycleSaveProf('${abKey}')" title="${pipTitle}"></span>
+                  <span class="save-name">${name}</span>
+                </span>
+                <span class="save-val editable-stat" onclick="editStat('${key}')" title="Click to edit">+${st[key]}</span>
+              </div>`;
+        }).join('')}
       </div>
 
       <hr class="divider">
@@ -1397,6 +1424,9 @@
       s.spellDCOverride = null;
       s.spellAtkOverride = null;
     });
+  }
+  function cycleSaveProf(key) {
+    update(s => s.saveProfs[key] = (s.saveProfs[key] + 1) % 3);
   }
 
   // === EDITABLE STATS ===
