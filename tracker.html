@@ -907,7 +907,6 @@
   const DEFAULTS = {
     hp: { current: 560, max: 580, temp: 168 },
     form: null,
-    pm: 50,
     slots: [4, 3, 3, 3, 3, 2, 2, 1, 1],
     enemies: [],
     stats: {
@@ -1222,49 +1221,6 @@
         .map(c => c.duration === null ? c : { ...c, duration: c.duration - 1 })
         .filter(c => c.duration === null || c.duration > 0);
     });
-  }
-
-  // === PRIMA MATERIA ===
-  function getPMState(pm) {
-    const pct = pm / 100;
-    if (pm >= 100) return { cls: 'supercritical', rate: '⚠ SUPERCRITICAL', label: 'supercritical' };
-    if (pct >= 0.90) return { cls: 'decay-12', rate: '12 PM/hr decay', label: 'decay-12' };
-    if (pct >= 0.75) return { cls: 'decay-10', rate: '10 PM/hr decay', label: 'decay-10' };
-    if (pct >= 0.50) return { cls: 'decay-5',  rate: '5 PM/hr decay',  label: 'decay-5'  };
-    return { cls: 'decay-0', rate: 'No decay', label: 'decay-0' };
-  }
-
-  function renderPM() {
-    const { pm } = state;
-    const pct = Math.min(100, (pm / 100) * 100);
-    const pmState = getPMState(pm);
-
-    document.getElementById('pm-section').innerHTML = `
-      <div class="panel-title">Prima Materia — Tier IV</div>
-      <div class="pm-meter-wrap">
-        <div class="pm-meter-track">
-          <div class="pm-meter-fill ${pmState.cls}" style="width:${pct}%"></div>
-        </div>
-        <div class="pm-label-over">${pm} / 100</div>
-      </div>
-      <div class="pm-controls">
-        <button class="btn-sm" onclick="adjustPM(-1)">−1</button>
-        <button class="btn-sm" onclick="adjustPM(-5)">−5</button>
-        <input id="pm-input" type="number" value="${pm}" min="0" max="100"
-          onchange="setPM(+this.value)" onkeydown="if(event.key==='Enter') setPM(+this.value)">
-        <button class="btn-sm" onclick="adjustPM(5)">+5</button>
-        <button class="btn-sm" onclick="adjustPM(1)">+1</button>
-      </div>
-      <div class="decay-indicator ${pmState.label}">${pmState.rate}</div>
-      ${pm >= 100 ? '<div class="supercritical-warning">⚠ DC 25 WIS SAVE — SUPERCRITICAL EVENT</div>' : ''}
-    `;
-  }
-
-  function adjustPM(delta) {
-    update(s => s.pm = Math.max(0, Math.min(100, s.pm + delta)));
-  }
-  function setPM(val) {
-    if (!isNaN(val)) update(s => s.pm = Math.max(0, Math.min(100, val)));
   }
 
   // === SPELL SLOTS ===
@@ -1698,11 +1654,9 @@
   function render() {
     renderHeader();
     renderHP();
-    renderPM();
     renderActiveSpells();
     renderSlots();
     renderEnemies();
-    document.body.classList.toggle('supercritical-flash', state.pm >= 100);
     applyColWidths();
   }
 
