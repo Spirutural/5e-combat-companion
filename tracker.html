@@ -1046,6 +1046,8 @@
       <div id="magic-items-wrap"></div>
       <hr class="divider">
       <div id="attuned-wrap"></div>
+      <hr class="divider">
+      <div id="skills-wrap"></div>
     </div>
   </div>
 </div>
@@ -1116,6 +1118,15 @@
     attunedOpen: true,
     statusOpen: true,
     saveProfs: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 },
+    skillsOpen: true,
+    skills: {
+      athletics: 0,
+      acrobatics: 0, sleightOfHand: 0, stealth: 0,
+      arcana: 0, history: 0, investigation: 0, nature: 0, religion: 0,
+      animalHandling: 0, insight: 0, medicine: 0, perception: 0, survival: 0,
+      deception: 0, intimidation: 0, performance: 0, persuasion: 0,
+    },
+    customSkills: [],
   };
 
   const STORAGE_KEY = '5e_tracker_v1';
@@ -1165,6 +1176,9 @@
   if (state.statusOpen === undefined) state.statusOpen = true;
   if (state.layout.rightW < 340) state.layout.rightW = 360;
   if (!state.saveProfs) state.saveProfs = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 };
+  if (state.skillsOpen === undefined) state.skillsOpen = true;
+  if (!state.skills) state.skills = { ...DEFAULTS.skills };
+  if (!state.customSkills) state.customSkills = [];
   function update(mutatorFn) {
     mutatorFn(state);
     saveState();
@@ -2253,6 +2267,98 @@
     `;
   }
 
+  // === SKILLS ===
+  const SKILL_DEFS = [
+    ['Athletics',       'str', 'athletics'],
+    ['Acrobatics',      'dex', 'acrobatics'],
+    ['Sleight of Hand', 'dex', 'sleightOfHand'],
+    ['Stealth',         'dex', 'stealth'],
+    ['Arcana',          'int', 'arcana'],
+    ['History',         'int', 'history'],
+    ['Investigation',   'int', 'investigation'],
+    ['Nature',          'int', 'nature'],
+    ['Religion',        'int', 'religion'],
+    ['Animal Handling', 'wis', 'animalHandling'],
+    ['Insight',         'wis', 'insight'],
+    ['Medicine',        'wis', 'medicine'],
+    ['Perception',      'wis', 'perception'],
+    ['Survival',        'wis', 'survival'],
+    ['Deception',       'cha', 'deception'],
+    ['Intimidation',    'cha', 'intimidation'],
+    ['Performance',     'cha', 'performance'],
+    ['Persuasion',      'cha', 'persuasion'],
+  ];
+  const ABILITY_KEYS = ['str','dex','con','int','wis','cha'];
+
+  function cycleSkillProf(key) {
+    update(s => s.skills[key] = (s.skills[key] + 1) % 3);
+  }
+  function toggleSkillsOpen() {
+    update(s => s.skillsOpen = !s.skillsOpen);
+  }
+  function cycleCustomSkillProf(id) {
+    update(s => { const sk = s.customSkills.find(x => x.id === id); if (sk) sk.prof = (sk.prof + 1) % 3; });
+  }
+  function removeCustomSkill(id) {
+    update(s => s.customSkills = s.customSkills.filter(x => x.id !== id));
+  }
+  function addCustomSkill() {
+    const name = prompt('Skill name:');
+    if (!name?.trim()) return;
+    const ab = prompt('Linked ability (str / dex / con / int / wis / cha):', 'str');
+    if (!ab || !ABILITY_KEYS.includes(ab.trim().toLowerCase())) {
+      alert('Enter one of: str, dex, con, int, wis, cha');
+      return;
+    }
+    update(s => s.customSkills.push({ id: String(Date.now()), name: name.trim(), abilityKey: ab.trim().toLowerCase(), prof: 0 }));
+  }
+
+  function skillRow(label, abilityKey, pipState, onPipClick, onRemove) {
+    const abilityScore = state.stats[abilityKey] ?? 10;
+    const abilityMod = Math.floor((abilityScore - 10) / 2);
+    const bonus = pipState === 2 ? state.profBonus * 2 : pipState === 1 ? state.profBonus : 0;
+    const total = abilityMod + bonus;
+    const sign = total >= 0 ? '+' : '';
+    const pipCls = pipState === 2 ? 'expertise' : pipState === 1 ? 'prof' : '';
+    const pipTitle = ['Not proficient', 'Proficient', 'Expertise'][pipState];
+    return `
+      <div class="save-row" style="padding:3px 0;">
+        <span style="display:flex;align-items:center;gap:5px;">
+          <span class="prof-pip ${pipCls}" onclick="${onPipClick}" title="${pipTitle}"></span>
+          <span class="save-name" style="font-size:0.7rem;">${label}</span>
+          ${onRemove ? `<span style="font-size:0.58rem;color:#2a5a6a;text-transform:uppercase;">${abilityKey}</span>` : ''}
+        </span>
+        <span style="display:flex;align-items:center;gap:4px;">
+          <span class="stat-value" style="font-size:0.78rem;font-weight:500;">${sign}${total}</span>
+          ${onRemove ? `<button onclick="${onRemove}" style="background:none;border:none;color:#2a4a5a;cursor:pointer;font-size:0.75rem;padding:0 2px;" title="Remove">✕</button>` : ''}
+        </span>
+      </div>
+    `;
+  }
+
+  function renderSkills() {
+    const { skills, customSkills, skillsOpen } = state;
+    const builtInRows = SKILL_DEFS.map(([label, abilityKey, stateKey]) =>
+      skillRow(label, abilityKey, skills[stateKey] ?? 0, `cycleSkillProf('${stateKey}')`, null)
+    ).join('');
+    const customRows = customSkills.map(sk =>
+      skillRow(sk.name, sk.abilityKey, sk.prof, `cycleCustomSkillProf('${sk.id}')`, `removeCustomSkill('${sk.id}')`)
+    ).join('');
+    return `
+      <div style="margin-top:4px;">
+        <div class="panel-title collapsible-title" onclick="toggleSkillsOpen()">
+          <span>Skills</span>
+          <span>${skillsOpen ? '▲' : '▼'}</span>
+        </div>
+        ${skillsOpen ? `
+          ${builtInRows}
+          ${customRows}
+          <button class="btn-add-inv" onclick="addCustomSkill()" style="margin-top:8px;">+ Add Custom Skill</button>
+        ` : ''}
+      </div>
+    `;
+  }
+
   // === ACTIVE SPELLS ===
   function toggleStatus() {
     update(s => s.statusOpen = !s.statusOpen);
@@ -2445,6 +2551,7 @@
     document.getElementById('inventory-wrap').innerHTML = renderInventory();
     document.getElementById('magic-items-wrap').innerHTML = renderMagicItems();
     document.getElementById('attuned-wrap').innerHTML = renderAttunedItems();
+    document.getElementById('skills-wrap').innerHTML = renderSkills();
     applyColWidths();
   }
 
