@@ -456,6 +456,40 @@
     .rest-menu button:last-child { border-bottom: none; }
     .rest-menu button:hover { background: #0f2535; }
 
+    /* === FORMULA DROPDOWN === */
+    .formula-dropdown-wrap { position: relative; }
+    .formula-dropdown-btn {
+      background: #0a1e2a;
+      border: 1px solid #1a3a4a;
+      color: #8ab8c8;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+    }
+    .formula-dropdown-btn:hover { border-color: #2ab8d0; color: #2ab8d0; }
+    .formula-panel {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      right: 0;
+      background: #071824;
+      border: 1px solid #1a3a4a;
+      border-radius: 4px;
+      padding: 10px 14px;
+      z-index: 100;
+      min-width: 280px;
+      font-size: 0.75rem;
+      line-height: 1.8;
+      color: #8ab8c8;
+      white-space: nowrap;
+    }
+    .formula-panel.open { display: block; }
+    .formula-row { display: flex; gap: 8px; }
+    .formula-lhs { color: #4a7a8a; min-width: 90px; }
+
     /* === ACTIVE SPELLS === */
     .active-spell {
       display: flex;
@@ -1286,6 +1320,17 @@
 
   // === HEADER ===
   let restMenuOpen = false;
+  function toggleFormulaPanel() {
+    const panel = document.getElementById('formula-panel');
+    panel.classList.toggle('open');
+  }
+  document.addEventListener('click', e => {
+    const wrap = document.querySelector('.formula-dropdown-wrap');
+    if (wrap && !wrap.contains(e.target)) {
+      document.getElementById('formula-panel')?.classList.remove('open');
+    }
+  });
+
   function editCharacterName() {
     const val = prompt('Character name:', state.characterName);
     if (val !== null && val.trim() !== '') update(s => s.characterName = val.trim());
@@ -1298,6 +1343,14 @@
         <div id="rest-menu" class="rest-menu${restMenuOpen ? '' : ' hidden'}">
           <button onclick="shortRest()">Short Rest</button>
           <button onclick="longRest()">Long Rest</button>
+        </div>
+      </div>
+      <div class="formula-dropdown-wrap">
+        <button class="formula-dropdown-btn" onclick="toggleFormulaPanel(); event.stopPropagation();">Formulas ▾</button>
+        <div class="formula-panel" id="formula-panel">
+          <div class="formula-row"><span class="formula-lhs">Attack Roll</span><span>= d20 + Ability Mod + Proficiency</span></div>
+          <div class="formula-row"><span class="formula-lhs">Spell Attack</span><span>= d20 + Spell Mod + Proficiency</span></div>
+          <div class="formula-row"><span class="formula-lhs">Spell Save DC</span><span>= 8 + Spell Mod + Proficiency</span></div>
         </div>
       </div>
     `;
