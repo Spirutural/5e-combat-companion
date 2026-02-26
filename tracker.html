@@ -786,7 +786,6 @@
     hp: { current: 560, max: 580, temp: 168 },
     form: null,
     slots: [4, 3, 3, 3, 3, 2, 2, 1, 1],
-    enemies: [],
     stats: {
       ac: 24,
       str: 23, dex: 15, con: 30, int: 30, wis: 30, cha: 18,
@@ -1148,70 +1147,6 @@
     }
   }
 
-  // === ENEMY PANEL ===
-  function renderEnemies() {
-    const panel = document.getElementById('panel-enemies');
-    panel.innerHTML = `
-      <div class="panel-title">Enemies — Nigredo 25 ft.</div>
-      <button class="btn-add-enemy" onclick="addEnemy()">+ Add Enemy</button>
-      <div id="enemy-list">
-        ${state.enemies.map(e => renderEnemyCard(e)).join('')}
-      </div>
-      ${state.enemies.length > 0 ? `
-        <button class="pulse-btn" onclick="pulseAll()">
-          ⬡ Nigredo Pulse — +1 Stack All
-        </button>
-      ` : ''}
-    `;
-  }
-
-  function renderEnemyCard(e) {
-    const pips = Array.from({length: 10}, (_, i) => {
-      const active = i < e.dissolution;
-      const cls = active
-        ? (e.dissolution >= 8 ? 'active danger' : e.dissolution >= 5 ? 'active high' : 'active')
-        : 'empty';
-      return `<div class="d-pip ${cls}" onclick="adjustDissolution('${e.id}', ${i})"></div>`;
-    }).join('');
-
-    return `
-      <div class="enemy-card" id="enemy-${e.id}">
-        <div class="enemy-header">
-          <span class="enemy-name">${e.name}</span>
-          <button class="btn-remove-enemy" onclick="removeEnemy('${e.id}')">✕</button>
-        </div>
-        <div class="dissolution-label">Dissolution <span class="dissolution-count">${e.dissolution}/10</span></div>
-        <div class="dissolution-pips">${pips}</div>
-      </div>
-    `;
-  }
-
-  function addEnemy() {
-    const name = prompt('Enemy name:');
-    if (!name) return;
-    update(s => s.enemies.push({
-      id: String(Date.now()),
-      name,
-      dissolution: 0
-    }));
-  }
-
-  function removeEnemy(id) {
-    update(s => s.enemies = s.enemies.filter(e => e.id !== id));
-  }
-
-  function adjustDissolution(id, pipIndex) {
-    update(s => {
-      const e = s.enemies.find(e => e.id === id);
-      if (!e) return;
-      e.dissolution = pipIndex < e.dissolution ? pipIndex : Math.min(10, pipIndex + 1);
-    });
-  }
-
-  function pulseAll() {
-    update(s => s.enemies.forEach(e => e.dissolution = Math.min(10, e.dissolution + 1)));
-  }
-
   // === STAT BLOCKS ===
   const statBlocks = new Map(); // id → { name, type, url }
   let sbNextId = 0;
@@ -1534,7 +1469,6 @@
     renderHP();
     renderActiveSpells();
     renderSlots();
-    renderEnemies();
     applyColWidths();
   }
 
