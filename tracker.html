@@ -134,87 +134,6 @@
     .stat-label { color: #4a7a8a; }
     .stat-value { color: #d4a843; font-weight: 600; }
 
-    /* === PRIMA MATERIA === */
-    .pm-meter-wrap {
-      position: relative;
-      margin: 12px 0;
-    }
-    .pm-meter-track {
-      height: 28px;
-      background: #0a1e2a;
-      border-radius: 14px;
-      overflow: hidden;
-      border: 1px solid #0f2535;
-    }
-    .pm-meter-fill {
-      height: 100%;
-      border-radius: 14px;
-      transition: width 0.4s ease, background 0.4s ease;
-    }
-    .pm-meter-fill.decay-0  { background: linear-gradient(90deg, #0a4a2a, #20c870); }
-    .pm-meter-fill.decay-5  { background: linear-gradient(90deg, #4a4a00, #c8c020); }
-    .pm-meter-fill.decay-10 { background: linear-gradient(90deg, #4a2200, #d06010); }
-    .pm-meter-fill.decay-12 { background: linear-gradient(90deg, #4a0a0a, #d02020); }
-    .pm-meter-fill.supercritical {
-      background: linear-gradient(90deg, #8a6000, #ffd700);
-      box-shadow: 0 0 12px #ffd70080;
-      animation: pulse-gold 0.8s ease-in-out infinite alternate;
-    }
-    @keyframes pulse-gold {
-      from { box-shadow: 0 0 8px #ffd70060; }
-      to   { box-shadow: 0 0 20px #ffd700cc; }
-    }
-    .pm-label-over {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #fff;
-      text-shadow: 0 0 6px #000;
-      pointer-events: none;
-    }
-    .pm-controls {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-    .pm-controls input {
-      width: 64px;
-      background: #0a1e2a;
-      border: 1px solid #1a3a4a;
-      color: #c8dde8;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.85rem;
-      font-family: 'Inter', sans-serif;
-      text-align: center;
-    }
-    .decay-indicator {
-      font-size: 0.72rem;
-      padding: 3px 8px;
-      border-radius: 10px;
-      display: inline-block;
-      margin-top: 4px;
-    }
-    .decay-0  { background: #0a2a1a; color: #20c870; }
-    .decay-5  { background: #2a2a00; color: #c8c020; }
-    .decay-10 { background: #2a1200; color: #d06010; }
-    .decay-12 { background: #2a0a0a; color: #d02020; }
-    .supercritical-warning {
-      background: #2a1a00;
-      color: #ffd700;
-      border: 1px solid #ffd70060;
-      border-radius: 6px;
-      padding: 6px 10px;
-      font-size: 0.75rem;
-      text-align: center;
-      margin-top: 8px;
-      animation: pulse-gold 0.8s ease-in-out infinite alternate;
-    }
-
     /* === SPELL SLOTS === */
     .slots-grid {
       display: grid;
@@ -404,13 +323,6 @@
       opacity: 0.6;
     }
 
-    body.supercritical-flash {
-      animation: sc-flash 1s ease-in-out infinite alternate;
-    }
-    @keyframes sc-flash {
-      from { background: #050d14; }
-      to   { background: #0f0800; }
-    }
 
     /* === STAT BLOCK PANEL (floating) === */
     #stat-panel {
