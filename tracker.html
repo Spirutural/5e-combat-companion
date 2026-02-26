@@ -1018,7 +1018,7 @@
       <div class="panel-title">Character</div>
     </div>
     <div class="panel" id="panel-resources">
-      <div id="active-spells-section"></div>
+      <div id="status-section"></div>
       <hr class="divider">
       <div id="slots-section"></div>
       <hr class="divider">
@@ -1098,6 +1098,7 @@
     magicItemsOpen: false,
     attunementMax: 3,
     attunedOpen: true,
+    statusOpen: true,
   };
 
   const STORAGE_KEY = '5e_tracker_v1';
@@ -1144,6 +1145,7 @@
   if (state.attunementMax === undefined) state.attunementMax = 3;
   if (state.attunedOpen === undefined) state.attunedOpen = true;
   if (state.characterName === undefined) state.characterName = 'Character';
+  if (state.statusOpen === undefined) state.statusOpen = true;
   function update(mutatorFn) {
     mutatorFn(state);
     saveState();
@@ -1334,9 +1336,6 @@
 
       <hr class="divider">
       ${renderImmRes()}
-
-      <hr class="divider">
-      ${renderConditions()}
     `;
   }
 
@@ -2224,11 +2223,17 @@
   }
 
   // === ACTIVE SPELLS ===
-  function renderActiveSpells() {
+  function toggleStatus() {
+    update(s => s.statusOpen = !s.statusOpen);
+  }
+
+  function renderStatus() {
     const spells = state.activeSpells;
-    document.getElementById('active-spells-section').innerHTML = `
-      <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between">
-        <span>Active Spells</span>
+    const open = state.statusOpen;
+
+    const spellsBody = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <span style="font-size:0.65rem;color:#4a7a8a;text-transform:uppercase;letter-spacing:0.1em;">Active Spells</span>
         <button class="btn-sm" onclick="addActiveSpell()">+</button>
       </div>
       ${spells.length === 0 ? '<div class="no-spells">None active</div>' : ''}
@@ -2239,6 +2244,19 @@
           <button class="spell-remove" onclick="removeActiveSpell(${i})" title="End spell">✕</button>
         </div>
       `).join('')}
+    `;
+
+    const condsBody = `
+      <div style="border-top:1px solid #0f2535;margin:10px 0 8px;"></div>
+      ${renderConditions()}
+    `;
+
+    document.getElementById('status-section').innerHTML = `
+      <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Status</span>
+        <button class="btn-sm" onclick="toggleStatus()">${open ? '▲' : '▼'}</button>
+      </div>
+      ${open ? spellsBody + condsBody : ''}
     `;
   }
   function addActiveSpell() {
@@ -2388,7 +2406,7 @@
   function render() {
     renderHeader();
     renderHP();
-    renderActiveSpells();
+    renderStatus();
     renderSlots();
     document.getElementById('attacks-section-wrap').innerHTML = renderAttacks();
     document.getElementById('inventory-wrap').innerHTML = renderInventory();
