@@ -483,6 +483,33 @@
       cursor: pointer; user-select: none;
     }
 
+    /* === MAGIC ITEMS === */
+    .magic-item {
+      background: #071824; border: 1px solid #0f2535;
+      border-radius: 4px; padding: 7px 10px; margin-bottom: 6px;
+    }
+    .magic-item-header {
+      display: flex; align-items: center; gap: 6px; margin-bottom: 5px;
+    }
+    .magic-item-name {
+      flex: 1; font-size: 0.8rem; color: #a8d8e8; cursor: pointer;
+    }
+    .magic-item-name:hover { color: #2ab8d0; }
+    .magic-item-actions { display: flex; gap: 4px; }
+    .btn-toggle {
+      background: #0a1e2a; border: 1px solid #1a3a4a;
+      color: #4a7a8a; font-size: 0.65rem; letter-spacing: 0.05em;
+      padding: 2px 7px; border-radius: 3px; cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      text-transform: uppercase;
+    }
+    .btn-toggle.active-equipped { background: #0a2a1a; border-color: #20a850; color: #20a850; }
+    .btn-toggle.active-attuned  { background: #1a1a2a; border-color: #7070d8; color: #9090e8; }
+    .btn-remove-magic {
+      background: none; border: none; color: #2a4a5a; cursor: pointer; font-size: 0.8rem;
+    }
+    .btn-remove-magic:hover { color: #d05050; }
+
     /* === FORMULA DROPDOWN === */
     .formula-dropdown-wrap { position: relative; }
     .formula-dropdown-btn {
@@ -850,6 +877,8 @@
     </div>
     <div class="panel" id="panel-right">
       <div id="inventory-wrap"></div>
+      <hr class="divider">
+      <div id="magic-items-wrap"></div>
     </div>
   </div>
   <div id="viewer-clear-zone">
@@ -1478,6 +1507,57 @@
       if (menu) menu.classList.add('hidden');
     }
   });
+  // === MAGIC ITEMS ===
+  function addMagicItem() {
+    const name = prompt('Magic item name:');
+    if (!name) return;
+    update(s => s.magicItems.push({ id: String(Date.now()), name: name.trim(), equipped: false, attuned: false }));
+  }
+  function removeMagicItem(id) {
+    update(s => s.magicItems = s.magicItems.filter(i => i.id !== id));
+  }
+  function editMagicItemName(id) {
+    const item = state.magicItems.find(i => i.id === id);
+    if (!item) return;
+    const name = prompt('Magic item name:', item.name);
+    if (name !== null && name.trim()) update(s => { const i = s.magicItems.find(i => i.id === id); if (i) i.name = name.trim(); });
+  }
+  function toggleEquipped(id) {
+    update(s => { const i = s.magicItems.find(i => i.id === id); if (i) i.equipped = !i.equipped; });
+  }
+  function toggleAttuned(id) {
+    update(s => { const i = s.magicItems.find(i => i.id === id); if (i) i.attuned = !i.attuned; });
+  }
+  function toggleMagicItems() {
+    update(s => s.magicItemsOpen = !s.magicItemsOpen);
+  }
+  function renderMagicItems() {
+    const { magicItems, magicItemsOpen } = state;
+    return `
+      <div style="margin-top:12px;">
+        <div class="panel-title collapsible-title" onclick="toggleMagicItems()">
+          Magic Items <span>${magicItemsOpen ? '▲' : '▼'}</span>
+        </div>
+        ${magicItemsOpen ? `
+          ${magicItems.length === 0 ? '<div style="font-size:0.75rem;color:#2a4a5a;padding:4px 0;">None</div>' : ''}
+          ${magicItems.map(i => `
+            <div class="magic-item">
+              <div class="magic-item-header">
+                <span class="magic-item-name" onclick="editMagicItemName('${i.id}')" title="Click to rename">${i.name}</span>
+                <div class="magic-item-actions">
+                  <button class="btn-toggle ${i.equipped ? 'active-equipped' : ''}" onclick="toggleEquipped('${i.id}')">Equipped</button>
+                  <button class="btn-toggle ${i.attuned ? 'active-attuned' : ''}" onclick="toggleAttuned('${i.id}')">Attuned</button>
+                  <button class="btn-remove-magic" onclick="removeMagicItem('${i.id}')">✕</button>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+          <button class="btn-add-inv" onclick="addMagicItem()">+ Add Magic Item</button>
+        ` : ''}
+      </div>
+    `;
+  }
+
   // === INVENTORY ===
   function toggleInventory() {
     update(s => s.inventoryOpen = !s.inventoryOpen);
@@ -1796,6 +1876,7 @@
     renderSlots();
     document.getElementById('attacks-section-wrap').innerHTML = renderAttacks();
     document.getElementById('inventory-wrap').innerHTML = renderInventory();
+    document.getElementById('magic-items-wrap').innerHTML = renderMagicItems();
     applyColWidths();
   }
 
