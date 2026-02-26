@@ -510,6 +510,25 @@
     }
     .btn-remove-magic:hover { color: #d05050; }
 
+    /* === ATTUNED SECTION === */
+    .attuned-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .attuned-counter { font-size: 0.8rem; color: #9090e8; }
+    .attuned-counter.over { color: #d05050; }
+    .attuned-item-row {
+      display: flex; align-items: center; gap: 6px;
+      padding: 3px 0; font-size: 0.78rem; color: #a8d8e8;
+      border-bottom: 1px solid #0a1e2a;
+    }
+    .attuned-item-row:last-child { border-bottom: none; }
+    .attuned-dot { width: 6px; height: 6px; border-radius: 50%; background: #7070d8; flex-shrink: 0; }
+    .btn-add-attunement-slot {
+      width: 100%; margin-top: 8px;
+      background: none; border: 1px dashed #3a3a6a;
+      color: #4a4a9a; border-radius: 4px; padding: 4px;
+      cursor: pointer; font-size: 0.72rem;
+    }
+    .btn-add-attunement-slot:hover { border-color: #9090e8; color: #9090e8; }
+
     /* === FORMULA DROPDOWN === */
     .formula-dropdown-wrap { position: relative; }
     .formula-dropdown-btn {
@@ -879,6 +898,8 @@
       <div id="inventory-wrap"></div>
       <hr class="divider">
       <div id="magic-items-wrap"></div>
+      <hr class="divider">
+      <div id="attuned-wrap"></div>
     </div>
   </div>
   <div id="viewer-clear-zone">
@@ -1507,6 +1528,44 @@
       if (menu) menu.classList.add('hidden');
     }
   });
+  // === ATTUNED ITEMS ===
+  function increaseAttunementMax() {
+    update(s => s.attunementMax++);
+  }
+  function toggleAttunedSection() {
+    update(s => s.attunedOpen = !s.attunedOpen);
+  }
+  function renderAttunedItems() {
+    const attuned = state.magicItems.filter(i => i.attuned);
+    const max = state.attunementMax;
+    const count = attuned.length;
+    const over = count > max;
+    const { attunedOpen } = state;
+    return `
+      <div style="margin-top:12px;">
+        <div class="panel-title collapsible-title" onclick="toggleAttunedSection()">
+          <span>Attuned Items</span>
+          <span style="display:flex;align-items:center;gap:8px;">
+            <span class="attuned-counter ${over ? 'over' : ''}">${count} / ${max}</span>
+            <span>${attunedOpen ? '▲' : '▼'}</span>
+          </span>
+        </div>
+        ${attunedOpen ? `
+          ${attuned.length === 0
+            ? '<div style="font-size:0.75rem;color:#2a4a5a;padding:4px 0;">No attuned items</div>'
+            : attuned.map(i => `
+              <div class="attuned-item-row">
+                <div class="attuned-dot"></div>
+                <span>${i.name}</span>
+              </div>
+            `).join('')
+          }
+          <button class="btn-add-attunement-slot" onclick="increaseAttunementMax()">+ Add Attunement Slot</button>
+        ` : ''}
+      </div>
+    `;
+  }
+
   // === MAGIC ITEMS ===
   function addMagicItem() {
     const name = prompt('Magic item name:');
@@ -1877,6 +1936,7 @@
     document.getElementById('attacks-section-wrap').innerHTML = renderAttacks();
     document.getElementById('inventory-wrap').innerHTML = renderInventory();
     document.getElementById('magic-items-wrap').innerHTML = renderMagicItems();
+    document.getElementById('attuned-wrap').innerHTML = renderAttunedItems();
     applyColWidths();
   }
 
