@@ -1119,6 +1119,11 @@
     attunedOpen: true,
     statusOpen: true,
     saveProfs: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 },
+    hpEffects: {
+      aid:            { active: false, value: 5 },
+      heroesFeast:    { active: false, value: 0 },
+      maxHpReduction: { active: false, value: 0 },
+    },
     skillsOpen: true,
     skills: {
       athletics: 0,
@@ -1180,6 +1185,7 @@
   if (state.skillsOpen === undefined) state.skillsOpen = true;
   if (!state.skills) state.skills = { ...DEFAULTS.skills };
   if (!state.customSkills) state.customSkills = [];
+  if (!state.hpEffects) state.hpEffects = JSON.parse(JSON.stringify(DEFAULTS.hpEffects));
   if (state.stats.speedSwim === undefined) state.stats.speedSwim = 0;
   if (state.stats.speedClimb === undefined) state.stats.speedClimb = 0;
   if (state.stats.speedFly === undefined) state.stats.speedFly = 0;
@@ -2402,6 +2408,39 @@
   }
 
   // === ACTIVE SPELLS ===
+  function toggleHpEffect(key) {
+    update(s => {
+      const fx = s.hpEffects[key];
+      const val = Math.max(0, fx.value);
+      if (fx.active) {
+        // Turning OFF
+        if (key === 'maxHpReduction') {
+          s.hp.max = Math.max(1, s.hp.max + val);
+        } else {
+          s.hp.max = Math.max(1, s.hp.max - val);
+          s.hp.current = Math.min(s.hp.current, s.hp.max);
+        }
+        fx.active = false;
+      } else {
+        // Turning ON
+        if (key === 'maxHpReduction') {
+          s.hp.max = Math.max(1, s.hp.max - val);
+          s.hp.current = Math.min(s.hp.current, s.hp.max);
+        } else {
+          s.hp.max += val;
+          s.hp.current += val;
+        }
+        fx.active = true;
+      }
+    });
+  }
+  function setHpEffectValue(key, raw) {
+    const n = parseInt(raw);
+    if (!isNaN(n) && n >= 0 && !state.hpEffects[key].active) {
+      state.hpEffects[key].value = n;
+      saveState();
+    }
+  }
   function toggleStatus() {
     update(s => s.statusOpen = !s.statusOpen);
   }
@@ -2425,6 +2464,32 @@
       `).join('')}
     `;
 
+    const fx = state.hpEffects;
+    const hpFxBody = `
+      <div style="border-top:1px solid #0f2535;margin:10px 0 8px;"></div>
+      <div style="font-size:0.65rem;color:#4a7a8a;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">HP Effects</div>
+      ${[
+        { key: 'aid',            label: 'Aid',           color: '#2a8a6a' },
+        { key: 'heroesFeast',    label: "Heroes' Feast",  color: '#2a8a6a' },
+        { key: 'maxHpReduction', label: 'Max HP −',      color: '#8a2a2a' },
+      ].map(({ key, label, color }) => {
+        const ef = fx[key];
+        return `
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+            <span style="flex:1;font-size:0.8rem;color:#8ab8c8;">${label}</span>
+            <input type="number" min="0" value="${ef.value}"
+              onchange="setHpEffectValue('${key}', this.value)"
+              ${ef.active ? 'disabled' : ''}
+              style="width:42px;background:${ef.active ? '#0a1e2a' : '#0f2535'};border:1px solid #1a3a4a;color:${ef.active ? '#4a7a8a' : '#8ab8c8'};padding:2px 4px;border-radius:3px;font-size:0.8rem;text-align:right;">
+            <button class="btn-sm" onclick="toggleHpEffect('${key}')"
+              style="padding:2px 8px;background:${ef.active ? color : 'transparent'};border:1px solid ${color};color:${ef.active ? '#fff' : color};border-radius:3px;font-size:0.75rem;cursor:pointer;">
+              ${ef.active ? 'ON' : 'OFF'}
+            </button>
+          </div>
+        `;
+      }).join('')}
+    `;
+
     const condsBody = `
       <div style="border-top:1px solid #0f2535;margin:10px 0 8px;"></div>
       ${renderConditions()}
@@ -2435,7 +2500,7 @@
         <span>Status</span>
         <button class="btn-sm" onclick="toggleStatus()">${open ? '▲' : '▼'}</button>
       </div>
-      ${open ? spellsBody + condsBody : ''}
+      ${open ? spellsBody + hpFxBody + condsBody : ''}
     `;
   }
   function addActiveSpell() {
