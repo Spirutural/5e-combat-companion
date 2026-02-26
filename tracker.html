@@ -789,7 +789,7 @@
       str: 23, dex: 15, con: 30, int: 30, wis: 30, cha: 18,
       savStr: 7, savDex: 3, savCon: 20, savInt: 20, savWis: 20, savCha: 5,
       dc: 27, spellAtk: 19, passPerc: 48,
-      levelLabel: '20 Druid', initiative: 12, speed: 40, codexTier: 'IV', truesight: 120
+      levelLabel: '20 Druid', initiative: 12, speed: 40, truesight: 120
     },
     immunities: [],
     resistances: [],
@@ -821,7 +821,6 @@
   if (state.stats.levelLabel === undefined) state.stats.levelLabel = '20 Druid';
   if (state.stats.initiative === undefined) state.stats.initiative = 12;
   if (state.stats.speed === undefined) state.stats.speed = 40;
-  if (state.stats.codexTier === undefined) state.stats.codexTier = 'IV';
   if (state.stats.truesight === undefined) state.stats.truesight = 120;
   if (!state.activeSpells) state.activeSpells = [];
   if (!state.conditions) state.conditions = [];
@@ -863,7 +862,6 @@
       <div class="stat-row"><span class="stat-label">AC</span><span class="stat-value editable-stat" onclick="editStat('ac')" title="Click to edit">${st.ac}</span></div>
       <div class="stat-row"><span class="stat-label">Initiative</span><span class="stat-value editable-stat" onclick="editStat('initiative')" title="Click to edit">+${st.initiative}</span></div>
       <div class="stat-row"><span class="stat-label">Speed</span><span class="stat-value editable-stat" onclick="editStat('speed')" title="Click to edit">${st.speed} ft.</span></div>
-      <div class="stat-row"><span class="stat-label">Codex Tier</span><span class="stat-value editable-stat" onclick="editStat('codexTier')" title="Click to edit">${st.codexTier}</span></div>
       <div class="stat-row"><span class="stat-label">Level</span><span class="stat-value editable-stat" onclick="editStat('levelLabel')" title="Click to edit">${st.levelLabel}</span></div>
 
       <hr class="divider">
@@ -921,9 +919,9 @@
     savInt: 'INT Save', savWis: 'WIS Save', savCha: 'CHA Save',
     dc: 'Spell Save DC', spellAtk: 'Spell Attack', passPerc: 'Passive Perception',
     initiative: 'Initiative modifier', speed: 'Speed (ft)',
-    codexTier: 'Codex Tier', truesight: 'Truesight (ft)', levelLabel: 'Level & Class'
+    truesight: 'Truesight (ft)', levelLabel: 'Level & Class'
   };
-  const STRING_STAT_KEYS = new Set(['codexTier', 'levelLabel']);
+  const STRING_STAT_KEYS = new Set(['levelLabel']);
   function editStat(key) {
     const label = STAT_LABELS[key] || key;
     const current = state.stats[key];
