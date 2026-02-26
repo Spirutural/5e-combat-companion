@@ -1117,6 +1117,7 @@
     magicItemsOpen: false,
     attunementMax: 3,
     attunedOpen: true,
+    currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
     statusOpen: true,
     saveProfs: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 },
     hpEffects: {
@@ -1185,6 +1186,9 @@
   if (state.skillsOpen === undefined) state.skillsOpen = true;
   if (!state.skills) state.skills = { ...DEFAULTS.skills };
   if (!state.customSkills) state.customSkills = [];
+  if (!state.currency) state.currency = { pp: 0, gp: 0, sp: 0, cp: 0 };
+  state.inventory.forEach(i => { if (i.description === undefined) i.description = ''; if (i.qty === undefined) i.qty = '1'; });
+  state.magicItems.forEach(i => { if (i.description === undefined) i.description = ''; if (i.qty === undefined) i.qty = '1'; });
   if (!state.hpEffects) state.hpEffects = JSON.parse(JSON.stringify(DEFAULTS.hpEffects));
   if (state.stats.speedSwim === undefined) state.stats.speedSwim = 0;
   if (state.stats.speedClimb === undefined) state.stats.speedClimb = 0;
@@ -1198,6 +1202,8 @@
   // === SECTION EDIT MODE ===
   let editSection = null;
   let speedExpanded = false;
+  let itemDescOpen = {};
+  let itemDescEdit = null; // id of item currently being edited
 
   function sectionTitle(label, key) {
     const editing = editSection === key;
@@ -2158,7 +2164,7 @@
   function addMagicItem() {
     const name = prompt('Magic item name:');
     if (!name) return;
-    update(s => s.magicItems.push({ id: String(Date.now()), name: name.trim(), equipped: false, attuned: false }));
+    update(s => s.magicItems.push({ id: String(Date.now()), name: name.trim(), equipped: false, attuned: false, qty: '1', description: '' }));
   }
   function removeMagicItem(id) {
     update(s => s.magicItems = s.magicItems.filter(i => i.id !== id));
@@ -2180,6 +2186,45 @@
   }
   function renderMagicItems() {
     const { magicItems, magicItemsOpen } = state;
+    const magicRows = magicItems.map(i => {
+      const qty = parseInt(i.qty) || 1;
+      const descOpen = itemDescOpen[i.id];
+      const editing = itemDescEdit === i.id;
+      return `
+        <div>
+          <div class="magic-item">
+            <div class="magic-item-header">
+              <div style="display:flex;align-items:center;gap:4px;flex:1;min-width:0;">
+                <button class="btn-sm" onclick="adjustMagicQty('${i.id}',-1)" style="padding:0 5px;">−</button>
+                <span style="font-size:0.75rem;color:#5a8a9a;min-width:24px;text-align:center;">×${qty}</span>
+                <button class="btn-sm" onclick="adjustMagicQty('${i.id}',1)" style="padding:0 5px;">+</button>
+                <span class="magic-item-name" onclick="editMagicItemName('${i.id}')" title="Click to rename" style="margin-left:4px;">${i.name}</span>
+              </div>
+              <div class="magic-item-actions">
+                <button class="btn-toggle ${i.equipped ? 'active-equipped' : ''}" onclick="toggleEquipped('${i.id}')">Eqp</button>
+                <button class="btn-toggle ${i.attuned ? 'active-attuned' : ''}" onclick="toggleAttuned('${i.id}')">Att</button>
+                <button class="btn-sm" onclick="toggleItemDesc('${i.id}')" title="Description" style="padding:0 5px;opacity:${i.description ? 1 : 0.4};">${descOpen ? '▼' : '▶'}</button>
+                <button class="btn-remove-magic" onclick="removeMagicItem('${i.id}')">✕</button>
+              </div>
+            </div>
+          </div>
+          ${descOpen ? `
+            <div style="padding:4px 6px 4px 10px;background:#0a1825;border-left:2px solid #1a3a4a;margin-bottom:4px;">
+              ${editing ? `
+                <textarea id="edit-desc-${i.id}" style="width:100%;background:#0f2535;border:1px solid #1a3a4a;color:#8ab8c8;padding:4px;border-radius:3px;font-size:0.75rem;resize:vertical;min-height:48px;">${i.description}</textarea>
+                <div style="display:flex;gap:4px;margin-top:4px;">
+                  <button class="btn-sm" onclick="saveItemDesc('${i.id}',false)">Save</button>
+                  <button class="btn-sm" onclick="cancelEditDesc()">Cancel</button>
+                </div>
+              ` : `
+                <div style="font-size:0.75rem;color:#6a9aaa;white-space:pre-wrap;min-height:16px;">${i.description || '<em style="color:#2a4a5a;">No description</em>'}</div>
+                <button class="btn-sm" onclick="startEditDesc('${i.id}')" style="margin-top:4px;">✏ Edit</button>
+              `}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }).join('');
     return `
       <div style="margin-top:12px;">
         <div class="panel-title collapsible-title" onclick="toggleMagicItems()">
@@ -2187,36 +2232,66 @@
         </div>
         ${magicItemsOpen ? `
           ${magicItems.length === 0 ? '<div style="font-size:0.75rem;color:#2a4a5a;padding:4px 0;">None</div>' : ''}
-          ${magicItems.map(i => `
-            <div class="magic-item">
-              <div class="magic-item-header">
-                <span class="magic-item-name" onclick="editMagicItemName('${i.id}')" title="Click to rename">${i.name}</span>
-                <div class="magic-item-actions">
-                  <button class="btn-toggle ${i.equipped ? 'active-equipped' : ''}" onclick="toggleEquipped('${i.id}')">Equipped</button>
-                  <button class="btn-toggle ${i.attuned ? 'active-attuned' : ''}" onclick="toggleAttuned('${i.id}')">Attuned</button>
-                  <button class="btn-remove-magic" onclick="removeMagicItem('${i.id}')">✕</button>
-                </div>
-              </div>
-            </div>
-          `).join('')}
+          ${magicRows}
           <button class="btn-add-inv" onclick="addMagicItem()">+ Add Magic Item</button>
         ` : ''}
       </div>
     `;
   }
 
-  // === INVENTORY ===
+  // === INVENTORY / ITEM DESC / QTY / CURRENCY ===
+  function toggleItemDesc(id) {
+    itemDescOpen[id] = !itemDescOpen[id];
+    render();
+  }
+  function startEditDesc(id) {
+    itemDescEdit = id;
+    render();
+  }
+  function cancelEditDesc() {
+    itemDescEdit = null;
+    render();
+  }
+  function saveItemDesc(id, isInv) {
+    const val = document.getElementById('edit-desc-' + id)?.value ?? '';
+    update(s => {
+      const arr = isInv ? s.inventory : s.magicItems;
+      const item = arr.find(i => i.id === id);
+      if (item) item.description = val;
+    });
+    itemDescEdit = null;
+  }
+  function adjustInvQty(id, delta) {
+    update(s => {
+      const item = s.inventory.find(i => i.id === id);
+      if (!item) return;
+      const cur = parseInt(item.qty) || 1;
+      item.qty = String(Math.max(1, cur + delta));
+    });
+  }
+  function adjustMagicQty(id, delta) {
+    update(s => {
+      const item = s.magicItems.find(i => i.id === id);
+      if (!item) return;
+      const cur = parseInt(item.qty) || 1;
+      item.qty = String(Math.max(1, cur + delta));
+    });
+  }
+  function setCurrency(field, val) {
+    const n = parseInt(val);
+    if (!isNaN(n)) { state.currency[field] = Math.max(0, n); saveState(); }
+  }
   function toggleInventory() {
     update(s => s.inventoryOpen = !s.inventoryOpen);
   }
   function addInventoryItem() {
     const name = prompt('Item name:');
     if (!name) return;
-    const qty = prompt('Quantity (leave blank for 1):', '1');
     update(s => s.inventory.push({
       id: String(Date.now()),
       name: name.trim(),
-      qty: qty ? qty.trim() : '1'
+      qty: '1',
+      description: ''
     }));
   }
   function removeInventoryItem(id) {
@@ -2236,7 +2311,49 @@
     });
   }
   function renderInventory() {
-    const { inventory, inventoryOpen } = state;
+    const { inventory, inventoryOpen, currency } = state;
+    const invRows = inventory.map(i => {
+      const qty = parseInt(i.qty) || 1;
+      const descOpen = itemDescOpen[i.id];
+      const editing = itemDescEdit === i.id;
+      return `
+        <div>
+          <div class="inventory-item">
+            <button class="btn-sm" onclick="adjustInvQty('${i.id}',-1)" style="padding:0 5px;">−</button>
+            <span class="inv-qty" style="min-width:28px;text-align:center;">×${qty}</span>
+            <button class="btn-sm" onclick="adjustInvQty('${i.id}',1)" style="padding:0 5px;">+</button>
+            <span class="inv-name" onclick="editInventoryItem('${i.id}')" title="Click to rename" style="flex:1;margin-left:6px;">${i.name}</span>
+            <button class="btn-sm" onclick="toggleItemDesc('${i.id}')" title="Description" style="padding:0 5px;opacity:${i.description ? 1 : 0.4};">${descOpen ? '▼' : '▶'}</button>
+            <button class="btn-remove-inv" onclick="removeInventoryItem('${i.id}')">✕</button>
+          </div>
+          ${descOpen ? `
+            <div style="padding:4px 6px 4px 10px;background:#0a1825;border-left:2px solid #1a3a4a;margin-bottom:4px;">
+              ${editing ? `
+                <textarea id="edit-desc-${i.id}" style="width:100%;background:#0f2535;border:1px solid #1a3a4a;color:#8ab8c8;padding:4px;border-radius:3px;font-size:0.75rem;resize:vertical;min-height:48px;">${i.description}</textarea>
+                <div style="display:flex;gap:4px;margin-top:4px;">
+                  <button class="btn-sm" onclick="saveItemDesc('${i.id}',true)">Save</button>
+                  <button class="btn-sm" onclick="cancelEditDesc()">Cancel</button>
+                </div>
+              ` : `
+                <div style="font-size:0.75rem;color:#6a9aaa;white-space:pre-wrap;min-height:16px;">${i.description || '<em style="color:#2a4a5a;">No description</em>'}</div>
+                <button class="btn-sm" onclick="startEditDesc('${i.id}')" style="margin-top:4px;">✏ Edit</button>
+              `}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }).join('');
+    const currencyRow = `
+      <div style="border-top:1px solid #0f2535;margin-top:8px;padding-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+        ${['pp','gp','sp','cp'].map(c => `
+          <span style="display:flex;align-items:center;gap:3px;font-size:0.75rem;color:#8ab8c8;">
+            <span style="color:#5a8a9a;text-transform:uppercase;">${c}</span>
+            <input type="number" min="0" value="${currency[c]}" onchange="setCurrency('${c}',this.value)"
+              style="width:44px;background:#0f2535;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.75rem;text-align:right;">
+          </span>
+        `).join('')}
+      </div>
+    `;
     return `
       <div>
         <div class="panel-title collapsible-title" onclick="toggleInventory()">
@@ -2244,14 +2361,9 @@
         </div>
         ${inventoryOpen ? `
           ${inventory.length === 0 ? '<div style="font-size:0.75rem;color:#2a4a5a;padding:4px 0;">Empty</div>' : ''}
-          ${inventory.map(i => `
-            <div class="inventory-item">
-              <span class="inv-name" onclick="editInventoryItem('${i.id}')" title="Click to edit">${i.name}</span>
-              <span class="inv-qty">×${i.qty}</span>
-              <button class="btn-remove-inv" onclick="removeInventoryItem('${i.id}')">✕</button>
-            </div>
-          `).join('')}
+          ${invRows}
           <button class="btn-add-inv" onclick="addInventoryItem()">+ Add Item</button>
+          ${currencyRow}
         ` : ''}
       </div>
     `;
