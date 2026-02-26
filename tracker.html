@@ -917,6 +917,16 @@
 
       <hr class="divider">
       <div class="stat-row"><span class="stat-label">Passive Perception</span><span class="stat-value editable-stat" onclick="editStat('passPerc')" title="Click to edit">${st.passPerc}</span></div>
+      <div class="stat-row">
+        <span class="stat-label">Spell Ability</span>
+        <select onchange="setSpellcastingAbility(this.value)" style="background:#0a1e2a;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.8rem;">
+          ${['int','wis','cha'].map(k =>
+            `<option value="${k}" ${state.spellcastingAbility === k ? 'selected' : ''}>${k.toUpperCase()}</option>`
+          ).join('')}
+        </select>
+      </div>
+      <div class="stat-row"><span class="stat-label">Spell Save DC ${state.spellDCOverride !== null ? '✎' : '⟳'}</span><span class="stat-value editable-stat" onclick="editSpellDC()" title="Click to override (blank to reset)">${getSpellDC()}</span></div>
+      <div class="stat-row"><span class="stat-label">Spell Attack ${state.spellAtkOverride !== null ? '✎' : '⟳'}</span><span class="stat-value editable-stat" onclick="editSpellAtk()" title="Click to override (blank to reset)">+${getSpellAtk()}</span></div>
 
       <hr class="divider">
       ${renderImmRes()}
@@ -939,6 +949,41 @@
   function promptHP() {
     const val = prompt('Set current HP:', state.hp.current);
     if (val !== null && !isNaN(+val)) update(s => s.hp.current = Math.max(0, Math.min(s.hp.max, +val)));
+  }
+
+  function getSpellMod() {
+    const key = state.spellcastingAbility;
+    const score = state.stats[key] ?? 10;
+    return Math.floor((score - 10) / 2);
+  }
+  function getSpellDC() {
+    if (state.spellDCOverride !== null) return state.spellDCOverride;
+    return 8 + state.profBonus + getSpellMod();
+  }
+  function getSpellAtk() {
+    if (state.spellAtkOverride !== null) return state.spellAtkOverride;
+    return state.profBonus + getSpellMod();
+  }
+  function editSpellDC() {
+    const auto = 8 + state.profBonus + getSpellMod();
+    const val = prompt(`Spell Save DC (auto: ${auto}, blank to reset):`, state.spellDCOverride ?? auto);
+    if (val === null) return;
+    if (val.trim() === '') { update(s => s.spellDCOverride = null); return; }
+    if (!isNaN(+val)) update(s => s.spellDCOverride = +val);
+  }
+  function editSpellAtk() {
+    const auto = state.profBonus + getSpellMod();
+    const val = prompt(`Spell Attack (auto: +${auto}, blank to reset):`, state.spellAtkOverride ?? auto);
+    if (val === null) return;
+    if (val.trim() === '') { update(s => s.spellAtkOverride = null); return; }
+    if (!isNaN(+val)) update(s => s.spellAtkOverride = +val);
+  }
+  function setSpellcastingAbility(key) {
+    update(s => {
+      s.spellcastingAbility = key;
+      s.spellDCOverride = null;
+      s.spellAtkOverride = null;
+    });
   }
 
   function editProfBonus() {
