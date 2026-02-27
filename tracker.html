@@ -2138,11 +2138,8 @@
     update(s => s.attunementMax++);
   }
   function decreaseAttunementMax() {
-    const attuned = state.magicItems.filter(i => i.attuned).length;
+    const attuned = state.items.filter(i => i.attuned).length;
     update(s => s.attunementMax = Math.max(attuned, s.attunementMax - 1));
-  }
-  function toggleAttunedSection() {
-    update(s => s.attunedOpen = !s.attunedOpen);
   }
   function renderAttunedItems() {
     const attuned = state.magicItems.filter(i => i.attuned);
@@ -2182,25 +2179,27 @@
   function addMagicItem() {
     const name = prompt('Magic item name:');
     if (!name) return;
-    update(s => s.magicItems.push({ id: String(Date.now()), name: name.trim(), equipped: false, attuned: false, qty: '1', description: '' }));
-  }
-  function removeMagicItem(id) {
-    update(s => s.magicItems = s.magicItems.filter(i => i.id !== id));
+    update(s => s.items.push({
+      id: String(Date.now()),
+      name: name.trim(),
+      qty: '1',
+      description: '',
+      type: 'magic',
+      equipped: false,
+      attuned: false
+    }));
   }
   function editMagicItemName(id) {
-    const item = state.magicItems.find(i => i.id === id);
+    const item = state.items.find(i => i.id === id);
     if (!item) return;
     const name = prompt('Magic item name:', item.name);
-    if (name !== null && name.trim()) update(s => { const i = s.magicItems.find(i => i.id === id); if (i) i.name = name.trim(); });
+    if (name !== null && name.trim()) update(s => { const i = s.items.find(i => i.id === id); if (i) i.name = name.trim(); });
   }
   function toggleEquipped(id) {
-    update(s => { const i = s.magicItems.find(i => i.id === id); if (i) i.equipped = !i.equipped; });
+    update(s => { const i = s.items.find(i => i.id === id); if (i) i.equipped = !i.equipped; });
   }
   function toggleAttuned(id) {
-    update(s => { const i = s.magicItems.find(i => i.id === id); if (i) i.attuned = !i.attuned; });
-  }
-  function toggleMagicItems() {
-    update(s => s.magicItemsOpen = !s.magicItemsOpen);
+    update(s => { const i = s.items.find(i => i.id === id); if (i) i.attuned = !i.attuned; });
   }
   function renderMagicItems() {
     const { magicItems, magicItemsOpen } = state;
@@ -2270,26 +2269,17 @@
     itemDescEdit = null;
     render();
   }
-  function saveItemDesc(id, isInv) {
+  function saveItemDesc(id) {
     const val = document.getElementById('edit-desc-' + id)?.value ?? '';
     update(s => {
-      const arr = isInv ? s.inventory : s.magicItems;
-      const item = arr.find(i => i.id === id);
+      const item = s.items.find(i => i.id === id);
       if (item) item.description = val;
     });
     itemDescEdit = null;
   }
-  function adjustInvQty(id, delta) {
+  function adjustItemQty(id, delta) {
     update(s => {
-      const item = s.inventory.find(i => i.id === id);
-      if (!item) return;
-      const cur = parseInt(item.qty) || 1;
-      item.qty = String(Math.max(1, cur + delta));
-    });
-  }
-  function adjustMagicQty(id, delta) {
-    update(s => {
-      const item = s.magicItems.find(i => i.id === id);
+      const item = s.items.find(i => i.id === id);
       if (!item) return;
       const cur = parseInt(item.qty) || 1;
       item.qty = String(Math.max(1, cur + delta));
@@ -2305,24 +2295,27 @@
   function addInventoryItem() {
     const name = prompt('Item name:');
     if (!name) return;
-    update(s => s.inventory.push({
+    update(s => s.items.push({
       id: String(Date.now()),
       name: name.trim(),
       qty: '1',
-      description: ''
+      description: '',
+      type: 'normal',
+      equipped: false,
+      attuned: false
     }));
   }
-  function removeInventoryItem(id) {
-    update(s => s.inventory = s.inventory.filter(i => i.id !== id));
+  function removeItem(id) {
+    update(s => s.items = s.items.filter(i => i.id !== id));
   }
   function editInventoryItem(id) {
-    const item = state.inventory.find(i => i.id === id);
+    const item = state.items.find(i => i.id === id);
     if (!item) return;
     const name = prompt('Item name:', item.name);
     if (name === null) return;
     const qty = prompt('Quantity:', item.qty);
     update(s => {
-      const i = s.inventory.find(i => i.id === id);
+      const i = s.items.find(i => i.id === id);
       if (!i) return;
       i.name = name.trim();
       i.qty = (qty ?? item.qty).trim();
