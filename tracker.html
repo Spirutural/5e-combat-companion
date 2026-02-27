@@ -1071,6 +1071,53 @@
       z-index: 1000;
     }
     .help-overlay.hidden { display: none; }
+    .sr-modal {
+      background: #071824;
+      border: 1px solid #1a3a4a;
+      border-radius: 8px;
+      padding: 24px;
+      max-width: 360px;
+      width: 90%;
+      position: relative;
+    }
+    .sr-dice-count {
+      font-size: 0.85rem;
+      color: #8ab8c8;
+      margin-bottom: 14px;
+    }
+    .sr-picker {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .sr-picker-val {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #a8d8e8;
+      min-width: 28px;
+      text-align: center;
+    }
+    .sr-roll-list {
+      margin-bottom: 14px;
+      font-size: 0.82rem;
+      color: #8ab8c8;
+      line-height: 2;
+    }
+    .sr-roll-row {
+      display: flex;
+      justify-content: space-between;
+    }
+    .sr-total {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #a8d8e8;
+      margin-bottom: 16px;
+    }
+    .sr-actions {
+      display: flex;
+      gap: 8px;
+    }
     .help-modal {
       background: #071824;
       border: 1px solid #1a3a4a;
@@ -1203,6 +1250,13 @@
     <p>Drag a PDF or image onto the page to load a stat block. Drag the viewer panel to reposition it.</p>
     <h3>Saving</h3>
     <p>Everything saves automatically to this browser. Use Export / Import (in the Rests menu) to back up or transfer your character.</p>
+  </div>
+</div>
+<div id="short-rest-overlay" class="help-overlay hidden" onclick="srCloseOnBackdrop(event)">
+  <div class="sr-modal">
+    <button class="help-close" onclick="closeShortRest()">✕</button>
+    <h2 style="font-family:'Cinzel',serif;font-size:1rem;color:#a8d8e8;margin-bottom:16px;">Short Rest</h2>
+    <div id="sr-body"></div>
   </div>
 </div>
 <div id="drag-shield"></div>
