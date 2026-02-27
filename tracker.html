@@ -1653,6 +1653,7 @@
   let helpOpen = false;
 
   function sectionTitle(label, key) {
+    if (!key) return `<div class="panel-title">${label}</div>`;
     const editing = editSection === key;
     return `
       <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
