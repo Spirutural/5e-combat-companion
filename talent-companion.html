@@ -1488,8 +1488,14 @@
     characterName: 'Character',
     hp: { current: 100, max: 100, temp: 0 },
     hitDice: { max: 0, current: 0, dieType: 'd8', open: false },
-    slots: [4, 3, 3, 3, 3, 2, 2, 1, 1],
     activeSpells: [],
+    strain: { body: 0, mind: 0, soul: 0 },
+    strainMax: 16,
+    manifestDie: 'd6',
+    knownPowers: [],
+    concentration: [],
+    strainOpen: true,
+    powersOpen: true,
     conditions: [],
     immunities: [],
     resistances: [],
@@ -1506,10 +1512,6 @@
       speedSwim: 0, speedClimb: 0, speedFly: 0
     },
     profBonus: 2,
-    spellcastingAbility: 'wis',
-    spellDCOverride: null,
-    spellAtkOverride: null,
-    slotsVisible: true,
     senses: { truesight: 0, blindsight: 0, tremorsense: 0 },
     sensesOpen: false,
     charOpen: true,
@@ -1522,11 +1524,8 @@
     attunementMax: 3,
     currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
     statusOpen: true,
-    spellsOpen: true,
     feats: [],
     featsOpen: true,
-    preparedSpells: [],
-    preparedSpellsOpen: true,
     loreBook: [],
     loreActiveId: null,
     saveProfs: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 },
@@ -1582,10 +1581,6 @@
   if (state.stats.initiative === undefined) state.stats.initiative = 0;
   if (state.stats.speed === undefined) state.stats.speed = 30;
   if (state.profBonus === undefined) state.profBonus = 2;
-  if (state.spellcastingAbility === undefined) state.spellcastingAbility = 'wis';
-  if (state.spellDCOverride === undefined) state.spellDCOverride = null;
-  if (state.spellAtkOverride === undefined) state.spellAtkOverride = null;
-  if (state.slotsVisible === undefined) state.slotsVisible = true;
   if (!state.senses) state.senses = { truesight: 0, blindsight: 0, tremorsense: 0 };
   if (state.sensesOpen === undefined) state.sensesOpen = false;
   if (!state.attacks) state.attacks = [];
@@ -1622,7 +1617,6 @@
   });
   if (state.characterName === undefined) state.characterName = 'Character';
   if (state.statusOpen === undefined) state.statusOpen = true;
-  if (state.spellsOpen === undefined) state.spellsOpen = true;
   if (!state.feats) state.feats = [];
   if (state.featsOpen === undefined) state.featsOpen = true;
   state.feats.forEach(f => {
@@ -1644,10 +1638,15 @@
   if (state.stats.speedClimb === undefined) state.stats.speedClimb = 0;
   if (state.stats.speedFly === undefined) state.stats.speedFly = 0;
   ['savStr','savDex','savCon','savInt','savWis','savCha'].forEach(k => { if (state.stats[k] === undefined) state.stats[k] = 0; });
-  if (!state.preparedSpells) state.preparedSpells = [];
-  if (state.preparedSpellsOpen === undefined) state.preparedSpellsOpen = true;
   if (!state.loreBook) state.loreBook = [];
   if (state.loreActiveId === undefined) state.loreActiveId = null;
+  if (!state.strain) state.strain = { body: 0, mind: 0, soul: 0 };
+  if (state.strainMax === undefined) state.strainMax = 16;
+  if (!state.manifestDie) state.manifestDie = 'd6';
+  if (!state.knownPowers) state.knownPowers = [];
+  if (!state.concentration) state.concentration = [];
+  if (state.strainOpen === undefined) state.strainOpen = true;
+  if (state.powersOpen === undefined) state.powersOpen = true;
   function update(mutatorFn) {
     mutatorFn(state);
     saveState();
