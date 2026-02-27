@@ -1328,6 +1328,8 @@
     spellsOpen: true,
     feats: [],
     featsOpen: true,
+    preparedSpells: [],
+    preparedSpellsOpen: true,
     saveProfs: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 },
     hpEffects: {
       aid:            { active: false, value: 5 },
@@ -1438,6 +1440,8 @@
   if (state.stats.speedSwim === undefined) state.stats.speedSwim = 0;
   if (state.stats.speedClimb === undefined) state.stats.speedClimb = 0;
   if (state.stats.speedFly === undefined) state.stats.speedFly = 0;
+  if (!state.preparedSpells) state.preparedSpells = [];
+  if (state.preparedSpellsOpen === undefined) state.preparedSpellsOpen = true;
   function update(mutatorFn) {
     mutatorFn(state);
     saveState();
