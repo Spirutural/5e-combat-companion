@@ -680,6 +680,90 @@
     }
     .prep-spell-notes.empty { color: #2a5a6a; font-style: italic; }
 
+    /* === LORE BOOK PANEL === */
+    #lore-panel {
+      display: none;
+      position: fixed;
+      left: 20px;
+      top: 70px;
+      width: 680px;
+      height: 860px;
+      flex-direction: column;
+      background: #040b12;
+      border: 1px solid #1a3a4a;
+      border-radius: 6px 6px 3px 3px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.7);
+      z-index: 100;
+      min-width: 280px;
+      min-height: 160px;
+    }
+    #lore-panel.open { display: flex; }
+    #lore-panel.minimized { height: 38px !important; }
+    #lore-titlebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      height: 38px;
+      background: #071824;
+      border-bottom: 1px solid #1a3a4a;
+      cursor: grab;
+      user-select: none;
+      flex-shrink: 0;
+    }
+    #lore-titlebar:active { cursor: grabbing; }
+    .lore-panel-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #4a8a9a;
+    }
+    #lore-subheader {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 10px;
+      border-bottom: 1px solid #0c2535;
+      background: #050f1a;
+      flex-shrink: 0;
+    }
+    #lore-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 8px;
+    }
+    #lore-empty {
+      font-size: 0.8rem;
+      color: #2a5a6a;
+      text-align: center;
+      margin-top: 40px;
+      font-style: italic;
+    }
+    #lore-textarea {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #8ab8c8;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      resize: none;
+      font-family: inherit;
+      width: 100%;
+    }
+    #lore-footer {
+      display: flex;
+      gap: 8px;
+      padding: 8px 10px;
+      border-top: 1px solid #0c2535;
+      background: #050f1a;
+      flex-shrink: 0;
+    }
+
     /* === ACTIVE SPELLS === */
     .active-spell {
       display: flex;
