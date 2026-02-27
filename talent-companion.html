@@ -1,0 +1,3927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Talent's Companion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    /* === RESET & BASE === */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { zoom: 0.9; }
+    body { overflow-y: auto; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #050d14;
+      color: #c8dde8;
+    }
+
+    /* === LAYOUT === */
+    #app {
+      display: grid;
+      grid-template-rows: auto auto;
+      min-height: 100vh;
+    }
+    header {
+      background: linear-gradient(180deg, #071824 0%, #050d14 100%);
+      border-bottom: 1px solid #1a3a4a;
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    header h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.5rem;
+      color: #a8d8e8;
+      letter-spacing: 0.1em;
+    }
+    .columns {
+      display: grid;
+      grid-template-columns: 260px 1fr 300px;
+      gap: 1px;
+      background: #0a1a24;
+      align-items: start;
+      position: relative;
+    }
+    .panel {
+      background: #060f18;
+      padding: 16px;
+    }
+    .panel + .panel {
+      border-left: 1px solid #0f2535;
+    }
+    .panel-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #4a7a8a;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #0f2535;
+    }
+
+    /* === HP BARS === */
+    .hp-section { margin-bottom: 20px; }
+    .hp-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #4a7a8a;
+      margin-bottom: 4px;
+    }
+    .hp-bar-track {
+      height: 10px;
+      background: #0a1e2a;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 6px;
+      border: 1px solid #0f2535;
+    }
+    .hp-bar-fill {
+      height: 100%;
+      border-radius: 5px;
+      transition: width 0.3s ease;
+    }
+    .hp-bar-fill.hp-healthy  { background: linear-gradient(90deg, #0a4a3a, #20c878); }
+    .hp-bar-fill.hp-hurt     { background: linear-gradient(90deg, #4a3a00, #c8a020); }
+    .hp-bar-fill.hp-critical { background: linear-gradient(90deg, #4a0a0a, #d02020); }
+    .hp-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .hp-display { font-size: 1.1rem; color: #e8f4f8; min-width: 80px; }
+    .btn-sm {
+      background: #0a1e2a;
+      border: 1px solid #1a3a4a;
+      color: #8ab8c8;
+      padding: 3px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+    }
+    .btn-sm:hover { background: #0f2d40; border-color: #2ab8d0; color: #c8dde8; }
+    .temp-hp { font-size: 0.75rem; color: #7ab0c0; margin-top: 2px; }
+
+    .divider { border: none; border-top: 1px solid #0f2535; margin: 16px 0; }
+
+    /* === SAVES === */
+    .saves-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 12px;
+    }
+    .save-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      padding: 2px 0;
+    }
+    .save-name { color: #4a7a8a; text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.05em; }
+    .save-val  { color: #a8d8e8; font-weight: 500; }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      padding: 3px 0;
+      border-bottom: 1px solid #0a1e2a;
+    }
+    .stat-label { color: #4a7a8a; }
+    .stat-value { color: #d4a843; font-weight: 600; }
+
+    /* === SPELL SLOTS === */
+    .slots-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .slot-group { }
+    .slot-level-label {
+      font-size: 0.65rem;
+      color: #4a7a8a;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .slot-pips { display: flex; gap: 4px; flex-wrap: wrap; }
+    .pip {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: 1px solid #1a3a4a;
+    }
+    .pip.full  { background: #2ab8d0; box-shadow: 0 0 5px #2ab8d060; }
+    .pip.empty { background: #0a1e2a; }
+    .pip:hover { transform: scale(1.2); }
+    /* === PROFICIENCY PIPS === */
+    .prof-pip {
+      width: 11px; height: 11px;
+      border-radius: 50%;
+      border: 1.5px solid #2a6a7a;
+      background: #0a1e2a;
+      cursor: pointer; flex-shrink: 0;
+      transition: all 0.15s;
+      display: inline-block;
+    }
+    .prof-pip:hover { transform: scale(1.25); }
+    .prof-pip.prof { background: #2ab8d0; border-color: #2ab8d0; }
+    .prof-pip.expertise {
+      background: #2ab8d0; border-color: #2ab8d0;
+      box-shadow: 0 0 0 2px #050d14, 0 0 0 4px #2ab8d0;
+    }
+    .rest-buttons { display: flex; gap: 8px; margin-top: 8px; }
+    .btn-rest {
+      flex: 1;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #1a3a4a;
+      background: #0a1e2a;
+      color: #8ab8c8;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: all 0.15s;
+    }
+    .btn-rest:hover { background: #0f2d40; border-color: #2ab8d0; color: #c8dde8; }
+    .btn-rest.long { border-color: #d4a84340; color: #d4a843; }
+    .btn-rest.long:hover { background: #1a1000; border-color: #d4a843; }
+
+    /* === POLISH === */
+    header {
+      box-shadow: 0 2px 20px #2ab8d010;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #2ab8d0, #d4a843, #2ab8d0, transparent);
+      z-index: 100;
+    }
+    .panel::-webkit-scrollbar { width: 4px; }
+    .panel::-webkit-scrollbar-track { background: transparent; }
+    .panel::-webkit-scrollbar-thumb { background: #1a3a4a; border-radius: 2px; }
+
+    /* Danger flash on enemy card at 0 HP */
+    .enemy-card.dead {
+      border-color: #4a1010;
+      opacity: 0.6;
+    }
+
+
+    /* === STAT BLOCK PANEL (floating) === */
+    #stat-panel {
+      display: none;
+      position: fixed;
+      right: 20px;
+      top: 70px;
+      width: 680px;
+      height: 860px;
+      display: none;
+      flex-direction: column;
+      background: #040b12;
+      border: 1px solid #1a3a4a;
+      border-radius: 6px 6px 3px 3px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.7);
+      z-index: 100;
+      min-width: 280px;
+      min-height: 160px;
+    }
+    #stat-panel.open { display: flex; }
+    #stat-titlebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      height: 38px;
+      background: #071824;
+      border-bottom: 1px solid #1a3a4a;
+      cursor: grab;
+      user-select: none;
+      flex-shrink: 0;
+    }
+    #stat-titlebar:active { cursor: grabbing; }
+    .stat-panel-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.62rem;
+      color: #4a7a8a;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+    #stat-close-btn {
+      background: none;
+      border: 1px solid #1a3a4a;
+      color: #4a7a8a;
+      width: 20px;
+      height: 20px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.15s, color 0.15s;
+      line-height: 1;
+    }
+    #stat-close-btn:hover { border-color: #c04040; color: #c04040; }
+    #stat-panel.minimized { height: 38px !important; }
+    #stat-minimize-btn {
+      background: none;
+      border: 1px solid #1a3a4a;
+      color: #4a7a8a;
+      width: 20px;
+      height: 20px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.15s, color 0.15s;
+      line-height: 1;
+      padding-bottom: 2px;
+    }
+    #stat-minimize-btn:hover { border-color: #2ab8d0; color: #2ab8d0; }
+    #drag-shield {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 101;
+    }
+    #drag-shield.active { display: block; }
+    .panel-resize-handle { position: absolute; z-index: 10; }
+    .panel-resize-n  { top: 0;    left: 12px;  height: 5px; width: calc(100% - 24px); cursor: ns-resize; }
+    .panel-resize-e  { right: 0;  top: 12px;   width: 5px; height: calc(100% - 24px); cursor: ew-resize; }
+    .panel-resize-w  { left: 0;   top: 12px;   width: 5px; height: calc(100% - 24px); cursor: ew-resize; }
+    .panel-resize-s  { bottom: 0; left: 12px;  height: 5px; width: calc(100% - 24px); cursor: ns-resize; }
+    .panel-resize-nw { top: 0;    left: 0;     width: 12px; height: 12px; cursor: nwse-resize; }
+    .panel-resize-ne { top: 0;    right: 0;    width: 12px; height: 12px; cursor: nesw-resize; }
+    .panel-resize-se { right: 0;  bottom: 0;   width: 12px; height: 12px; cursor: nwse-resize; }
+    .panel-resize-sw { left: 0;   bottom: 0;   width: 12px; height: 12px; cursor: nesw-resize; }
+    #stat-zoom-controls {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 14px;
+      background: #050d14;
+      border-bottom: 1px solid #0a1e2a;
+      flex-shrink: 0;
+    }
+    #stat-zoom-controls.visible { display: flex; }
+    .stat-tab-btn.active { border-color: #2ab8d0; color: #2ab8d0; background: #071824; }
+    .zoom-label {
+      font-size: 0.65rem;
+      color: #4a7a8a;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      min-width: 36px;
+      text-align: center;
+    }
+    #stat-preview {
+      flex: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 8px 12px;
+      background: #040b12;
+      min-height: 0;
+    }
+    #stat-preview::-webkit-scrollbar { width: 4px; }
+    #stat-preview::-webkit-scrollbar-thumb { background: #1a3a4a; border-radius: 2px; }
+    #stat-preview img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+      display: block;
+    }
+    #stat-preview embed {
+      width: min(700px, 92%);
+      height: 1100px;
+      border: none;
+      display: block;
+    }
+    .stat-preview-hint {
+      font-size: 0.65rem;
+      color: #1a3040;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      text-align: center;
+      transition: color 0.2s;
+    }
+    .stat-preview-hint.drag-over { color: #2ab8d0; }
+    #stat-thumbs {
+      border-top: 1px solid #0a1e2a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      overflow-x: auto;
+      background: #060f18;
+      flex-shrink: 0;
+      height: 110px;
+    }
+    #stat-thumbs::-webkit-scrollbar { height: 3px; }
+    #stat-thumbs::-webkit-scrollbar-thumb { background: #1a3a4a; border-radius: 2px; }
+    .drop-hint-strip {
+      font-size: 0.65rem;
+      color: #1e3a4a;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      white-space: nowrap;
+      padding: 6px 12px;
+      border: 1px dashed #0f2535;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .drop-hint-strip.drag-over { border-color: #2ab8d0; color: #2ab8d0; background: #071824; }
+    .stat-card {
+      flex-shrink: 0;
+      width: 56px;
+      cursor: pointer;
+      text-align: center;
+      transition: transform 0.15s;
+    }
+    .stat-card:hover { transform: translateY(-3px); }
+    .stat-card-thumb {
+      width: 56px;
+      height: 68px;
+      border-radius: 5px;
+      border: 1px solid #1a3a4a;
+      overflow: hidden;
+      background: #071824;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin-bottom: 3px;
+      transition: border-color 0.15s;
+    }
+    .stat-card.active .stat-card-thumb { border-color: #2ab8d0; box-shadow: 0 0 8px #2ab8d040; }
+    .stat-card:hover .stat-card-thumb { border-color: #2ab8d060; }
+    .stat-card-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .pdf-icon-thumb { font-size: 1.4rem; opacity: 0.5; }
+    .stat-card-remove {
+      position: absolute;
+      top: 2px; right: 2px;
+      background: #0a1e2a;
+      border: 1px solid #1a3a4a;
+      color: #4a7a8a;
+      border-radius: 50%;
+      width: 15px; height: 15px;
+      font-size: 0.5rem;
+      line-height: 14px;
+      text-align: center;
+      cursor: pointer;
+      opacity: 0.45;
+      transition: opacity 0.15s;
+    }
+    .stat-card:hover .stat-card-remove { opacity: 1; }
+    .stat-card-remove:hover { color: #d04040; border-color: #d04040; }
+    .stat-card-name {
+      font-size: 0.52rem;
+      color: #4a7a8a;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 56px;
+    }
+
+    /* === REST DROPDOWN === */
+    .rest-dropdown-wrap {
+      position: relative;
+    }
+    .rest-menu-btn {
+      background: none;
+      border: 1px solid #1a3a4a;
+      color: #5a8a9a;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .rest-menu-btn:hover { border-color: #2ab8d0; color: #a8d8e8; }
+    .rest-menu {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      background: #071824;
+      border: 1px solid #1a3a4a;
+      border-radius: 4px;
+      min-width: 130px;
+      z-index: 200;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+      overflow: hidden;
+    }
+    .rest-menu.hidden { display: none; }
+    .rest-menu button {
+      display: block;
+      width: 100%;
+      background: none;
+      border: none;
+      color: #a8d8e8;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      padding: 8px 14px;
+      text-align: left;
+      cursor: pointer;
+      border-bottom: 1px solid #0f2535;
+      transition: background 0.1s;
+    }
+    .rest-menu button:last-child { border-bottom: none; }
+    .rest-menu button:hover { background: #0f2535; }
+
+    /* === INVENTORY & MAGIC ITEMS === */
+    .inventory-item {
+      display: flex; align-items: center; gap: 6px;
+      padding: 4px 0; border-bottom: 1px solid #0a1e2a;
+      font-size: 0.8rem; color: #c8dde8;
+    }
+    .inventory-item:last-child { border-bottom: none; }
+    .inv-name { flex: 1; cursor: pointer; }
+    .inv-name:hover { color: #2ab8d0; }
+    .inv-qty { color: #4a7a8a; font-size: 0.75rem; min-width: 28px; text-align: right; }
+    .btn-remove-inv {
+      background: none; border: none; color: #2a4a5a;
+      cursor: pointer; font-size: 0.8rem; padding: 0 2px;
+    }
+    .btn-remove-inv:hover { color: #d05050; }
+    .btn-add-inv {
+      width: 100%; margin-top: 6px;
+      background: #071824; border: 1px dashed #1a3a4a;
+      color: #4a7a8a; border-radius: 4px; padding: 5px;
+      cursor: pointer; font-size: 0.75rem; letter-spacing: 0.05em;
+    }
+    .btn-add-inv:hover { border-color: #2ab8d0; color: #2ab8d0; }
+    .collapsible-title {
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; user-select: none;
+    }
+
+    /* === MAGIC ITEMS === */
+    .magic-item {
+      background: #071824; border: 1px solid #0f2535;
+      border-radius: 4px; padding: 7px 10px; margin-bottom: 6px;
+    }
+    .magic-item-header {
+      display: flex; align-items: center; gap: 6px; margin-bottom: 5px;
+    }
+    .magic-item-name {
+      flex: 1; font-size: 0.8rem; color: #a8d8e8; cursor: pointer;
+    }
+    .magic-item-name:hover { color: #2ab8d0; }
+    .magic-item-actions { display: flex; gap: 4px; }
+    .btn-toggle {
+      background: #0a1e2a; border: 1px solid #1a3a4a;
+      color: #4a7a8a; font-size: 0.65rem; letter-spacing: 0.05em;
+      padding: 2px 7px; border-radius: 3px; cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      text-transform: uppercase;
+    }
+    .btn-toggle.active-equipped { background: #0a2a1a; border-color: #20a850; color: #20a850; }
+    .btn-toggle.active-attuned  { background: #1a1a2a; border-color: #7070d8; color: #9090e8; }
+    .btn-remove-magic {
+      background: none; border: none; color: #2a4a5a; cursor: pointer; font-size: 0.8rem;
+    }
+    .btn-remove-magic:hover { color: #d05050; }
+
+    /* === ATTUNED SECTION === */
+    .attuned-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .attuned-counter { font-size: 0.8rem; color: #9090e8; }
+    .attuned-counter.over { color: #d05050; }
+    .attuned-item-row {
+      display: flex; align-items: center; gap: 6px;
+      padding: 3px 0; font-size: 0.78rem; color: #a8d8e8;
+      border-bottom: 1px solid #0a1e2a;
+    }
+    .attuned-item-row:last-child { border-bottom: none; }
+    .attuned-dot { width: 6px; height: 6px; border-radius: 50%; background: #7070d8; flex-shrink: 0; }
+    .btn-add-attunement-slot {
+      width: 100%; margin-top: 8px;
+      background: none; border: 1px dashed #3a3a6a;
+      color: #4a4a9a; border-radius: 4px; padding: 4px;
+      cursor: pointer; font-size: 0.72rem;
+    }
+    .btn-add-attunement-slot:hover { border-color: #9090e8; color: #9090e8; }
+
+    /* === FORMULA DROPDOWN === */
+    .formula-dropdown-wrap { position: relative; }
+    .formula-dropdown-btn {
+      background: #0a1e2a;
+      border: 1px solid #1a3a4a;
+      color: #8ab8c8;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+    }
+    .formula-dropdown-btn:hover { border-color: #2ab8d0; color: #2ab8d0; }
+    .formula-panel {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      right: 0;
+      background: #071824;
+      border: 1px solid #1a3a4a;
+      border-radius: 4px;
+      padding: 10px 14px;
+      z-index: 100;
+      min-width: 280px;
+      font-size: 0.75rem;
+      line-height: 1.8;
+      color: #8ab8c8;
+      white-space: nowrap;
+    }
+    .formula-panel.open { display: block; }
+    .formula-row { display: flex; gap: 8px; }
+    .formula-lhs { color: #4a7a8a; min-width: 90px; }
+
+    /* === CUSTOM ATTACKS === */
+    .attack-entry {
+      background: #071824;
+      border: 1px solid #0f2535;
+      border-radius: 4px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+    }
+    .attack-entry-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .attack-name {
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      color: #a8d8e8;
+      cursor: pointer;
+    }
+    .attack-name:hover { color: #2ab8d0; }
+    .attack-stats { font-size: 0.75rem; color: #8ab8c8; margin-bottom: 3px; }
+    .attack-notes { font-size: 0.7rem; color: #4a7a8a; font-style: italic; }
+    .btn-remove-attack {
+      background: none; border: none; color: #3a6a7a;
+      cursor: pointer; font-size: 0.85rem; padding: 0 4px;
+    }
+    .btn-remove-attack:hover { color: #d05050; }
+    .btn-add-attack {
+      width: 100%; margin-top: 6px;
+      background: #071824; border: 1px dashed #1a3a4a;
+      color: #4a7a8a; border-radius: 4px; padding: 6px;
+      cursor: pointer; font-size: 0.75rem; letter-spacing: 0.05em;
+    }
+    .btn-add-attack:hover { border-color: #2ab8d0; color: #2ab8d0; }
+
+    /* === PREPARED SPELLS === */
+    .prep-spells-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 10px 0 6px;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #4a7a8a;
+    }
+    .prep-level-group {
+      margin-bottom: 8px;
+    }
+    .prep-level-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #2a5a6a;
+      margin-bottom: 3px;
+    }
+    .prep-spell-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 0;
+      border-bottom: 1px solid #0c2535;
+    }
+    .prep-spell-name {
+      flex: 1;
+      font-size: 0.8rem;
+      color: #8ab8c8;
+      cursor: pointer;
+      user-select: none;
+    }
+    .prep-spell-name:hover { color: #a8d8e8; }
+    .prep-spell-expanded {
+      padding: 4px 0 6px 6px;
+      border-bottom: 1px solid #0c2535;
+    }
+    .prep-spell-notes {
+      font-size: 0.75rem;
+      color: #6a9aaa;
+      line-height: 1.5;
+      min-height: 20px;
+      cursor: text;
+      white-space: pre-wrap;
+    }
+    .prep-spell-notes.empty { color: #2a5a6a; font-style: italic; }
+
+    /* === LORE BOOK PANEL === */
+    #lore-panel {
+      display: none;
+      position: fixed;
+      left: 20px;
+      top: 70px;
+      width: 680px;
+      height: 860px;
+      flex-direction: column;
+      background: #040b12;
+      border: 1px solid #1a3a4a;
+      border-radius: 6px 6px 3px 3px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.7);
+      z-index: 100;
+      min-width: 280px;
+      min-height: 160px;
+    }
+    #lore-panel.open { display: flex; }
+    #lore-panel.minimized { height: 38px !important; }
+    #lore-titlebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      height: 38px;
+      background: #071824;
+      border-bottom: 1px solid #1a3a4a;
+      cursor: grab;
+      user-select: none;
+      flex-shrink: 0;
+    }
+    #lore-titlebar:active { cursor: grabbing; }
+    .lore-panel-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #4a8a9a;
+    }
+    #lore-subheader {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 10px;
+      border-bottom: 1px solid #0c2535;
+      background: #050f1a;
+      flex-shrink: 0;
+    }
+    #lore-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 8px;
+    }
+    #lore-empty {
+      font-size: 0.8rem;
+      color: #2a5a6a;
+      text-align: center;
+      margin-top: 40px;
+      font-style: italic;
+    }
+    #lore-textarea {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #8ab8c8;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      resize: none;
+      font-family: inherit;
+      width: 100%;
+    }
+    #lore-footer {
+      display: flex;
+      gap: 8px;
+      padding: 8px 10px;
+      border-top: 1px solid #0c2535;
+      background: #050f1a;
+      flex-shrink: 0;
+    }
+    .stat-panel-btn {
+      background: none;
+      border: 1px solid #1a3a4a;
+      color: #4a7a8a;
+      width: 20px;
+      height: 20px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.15s, color 0.15s;
+      line-height: 1;
+      padding: 0;
+    }
+    .stat-panel-btn:hover { border-color: #2ab8d0; color: #2ab8d0; }
+
+    /* === ACTIVE SPELLS === */
+    .active-spell {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 6px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      background: #0a1a24;
+      margin-bottom: 4px;
+      border: 1px solid #0f2535;
+    }
+    .spell-name { flex: 1; color: #c8dde8; }
+    .conc-badge {
+      font-size: 0.58rem;
+      padding: 1px 4px;
+      border-radius: 3px;
+      background: #2a1a3a;
+      color: #b088d8;
+      border: 1px solid #6040a0;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+    .spell-remove {
+      background: none;
+      border: none;
+      color: #3a5a6a;
+      cursor: pointer;
+      font-size: 0.75rem;
+      padding: 0 2px;
+      transition: color 0.15s;
+    }
+    .spell-remove:hover { color: #d04040; }
+    .no-spells {
+      font-size: 0.65rem;
+      color: #1e3a4a;
+      font-style: italic;
+      text-align: center;
+      padding: 6px 0 2px;
+    }
+
+    /* === EDITABLE STATS === */
+    .editable-stat {
+      cursor: pointer;
+      border-bottom: 1px dashed #3a5a6a;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .editable-stat:hover { color: #7ad4e8; border-bottom-color: #7ad4e8; }
+
+    /* === SENSES PANEL === */
+    .senses-grid { margin-top: 8px; }
+
+    /* === IMMUNITIES & RESISTANCES === */
+    .imm-summary {
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      gap: 3px 6px;
+      margin-bottom: 6px;
+    }
+    .imm-row-label {
+      font-size: 0.62rem;
+      color: #4a7a8a;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding-top: 2px;
+    }
+    .imm-tags { display: flex; flex-wrap: wrap; gap: 3px; }
+    .imm-tag {
+      font-size: 0.6rem;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-family: 'Inter', sans-serif;
+    }
+    .imm-tag.imm { background: #3a1a1a; color: #e87070; border: 1px solid #7a3030; }
+    .imm-tag.res { background: #1a2a3a; color: #70aae8; border: 1px solid #305070; }
+    .imm-none { font-size: 0.62rem; color: #3a5a6a; font-style: italic; }
+    .imm-picker {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px 8px;
+      background: #0e1e28;
+      border: 1px solid #1e3a4a;
+      border-radius: 4px;
+      padding: 8px;
+      margin-top: 4px;
+      margin-bottom: 4px;
+    }
+    .imm-col-head {
+      font-size: 0.6rem;
+      color: #4a7a8a;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #1e3a4a;
+      margin-bottom: 2px;
+    }
+    .imm-check {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.65rem;
+      color: #8ab0bc;
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 3px;
+      transition: background 0.1s;
+    }
+    .imm-check:hover { background: #1a3040; }
+    .imm-check input { accent-color: #4a9ab0; cursor: pointer; }
+    .imm-check.active-imm { color: #e87070; }
+    .imm-check.active-res { color: #70aae8; }
+
+    /* === CONDITIONS PANEL === */
+    .cond-section { margin-top: 0; }
+    .cond-add-row {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+    .cond-add-row select {
+      flex: 1;
+      background: #0a1e2a;
+      border: 1px solid #1a3a4a;
+      color: #c8dde8;
+      padding: 4px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-family: 'Inter', sans-serif;
+      appearance: none;
+      cursor: pointer;
+    }
+    .cond-add-row select:focus { outline: none; border-color: #2ab8d0; }
+    .cond-dur-input {
+      width: 44px;
+      background: #0a1e2a;
+      border: 1px solid #1a3a4a;
+      color: #c8dde8;
+      padding: 4px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-family: 'Inter', sans-serif;
+      text-align: center;
+    }
+    .cond-dur-input:focus { outline: none; border-color: #2ab8d0; }
+    .btn-cond-add {
+      background: #071824;
+      border: 1px solid #1a4a5a;
+      color: #2ab8d0;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .btn-cond-add:hover { background: #0a2535; border-color: #2ab8d0; }
+    .cond-custom-row {
+      display: none;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+    .cond-custom-row.visible { display: flex; }
+    .cond-list { margin-bottom: 6px; }
+    .cond-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 6px;
+      border-radius: 4px;
+      background: #0a1a24;
+      border: 1px solid #0f2535;
+      margin-bottom: 3px;
+      font-size: 0.72rem;
+    }
+    .cond-name {
+      flex: 1;
+      color: #c8dde8;
+      font-weight: 500;
+    }
+    .cond-dur {
+      font-size: 0.65rem;
+      color: #4a7a8a;
+      min-width: 28px;
+      text-align: right;
+    }
+    .cond-dur.permanent { color: #2ab8d0; }
+    .cond-remove {
+      background: none;
+      border: none;
+      color: #3a5a6a;
+      cursor: pointer;
+      font-size: 0.72rem;
+      padding: 0 2px;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .cond-remove:hover { color: #d04040; }
+    .no-conds {
+      font-size: 0.65rem;
+      color: #1e3a4a;
+      font-style: italic;
+      text-align: center;
+      padding: 4px 0 2px;
+    }
+    .btn-next-turn {
+      width: 100%;
+      padding: 6px;
+      background: #071824;
+      border: 1px solid #1a4a5a;
+      border-radius: 4px;
+      color: #4a7a8a;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      transition: all 0.15s;
+      margin-top: 2px;
+    }
+    .btn-next-turn:hover { background: #0a2535; border-color: #2ab8d0; color: #2ab8d0; }
+
+    /* === COLUMN DRAG HANDLES === */
+    .col-handle {
+      position: absolute;
+      top: 0;
+      width: 8px;
+      height: 100%;
+      cursor: col-resize;
+      z-index: 10;
+      background: transparent;
+      transform: translateX(-50%);
+    }
+    .col-handle::after {
+      content: '';
+      position: absolute;
+      left: 3px;
+      top: 0;
+      width: 2px;
+      height: 100%;
+      background: #0f2535;
+      transition: background 0.15s;
+    }
+    .col-handle:hover::after,
+    .col-handle.dragging::after { background: #2ab8d0; }
+
+    /* === SECTION EDIT MODE === */
+    .edit-pencil-btn {
+      background: none;
+      border: none;
+      color: #2a5a6a;
+      cursor: pointer;
+      font-size: 0.7rem;
+      padding: 0 4px;
+      opacity: 0.65;
+      transition: opacity 0.15s, color 0.15s;
+      line-height: 1;
+    }
+    .edit-pencil-btn:hover { opacity: 1; color: #2ab8d0; }
+    .section-edit-controls { display: flex; gap: 4px; align-items: center; }
+    .edit-save-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.6rem;
+      padding: 2px 8px;
+      background: #0a3a2a;
+      border: 1px solid #20a860;
+      color: #20a860;
+      border-radius: 3px;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+    }
+    .edit-save-btn:hover { background: #0d4a34; }
+    .edit-cancel-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.6rem;
+      padding: 2px 6px;
+      background: none;
+      border: 1px solid #3a2020;
+      color: #6a3a3a;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .edit-cancel-btn:hover { border-color: #c04040; color: #c04040; }
+    .edit-input-sm {
+      background: #0a1e2a;
+      border: 1px solid #1a3a4a;
+      border-bottom-color: #2ab8d0;
+      color: #c8dde8;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      padding: 1px 4px;
+      border-radius: 3px 3px 0 0;
+      width: 54px;
+      text-align: center;
+    }
+    .edit-input-sm:focus { outline: none; border-color: #2ab8d0; }
+    .edit-input-wide { width: 110px; text-align: left; }
+
+    /* === DICE ROLLER === */
+    .dice-dropdown-wrap { position: relative; }
+    .dice-dropdown-btn {
+      background: none;
+      border: 1px solid #1a3a4a;
+      color: #a8d8e8;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      padding: 5px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      letter-spacing: 0.04em;
+    }
+    .dice-dropdown-btn:hover { border-color: #2ab8d0; color: #2ab8d0; }
+    .dice-panel {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      z-index: 200;
+      min-width: 260px;
+      background: #071824;
+      border: 1px solid #1a3a4a;
+      border-radius: 5px;
+      padding: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      display: none;
+    }
+    .dice-panel.open { display: block; }
+    .dice-btn-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .btn-die {
+      background: #0a1e2a;
+      border: 1px solid #1a3a4a;
+      color: #a8d8e8;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      padding: 5px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      letter-spacing: 0.03em;
+    }
+    .btn-die:hover { border-color: #2ab8d0; color: #2ab8d0; background: #0d2535; }
+    .dice-controls-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      font-size: 0.7rem;
+      color: #4a7a8a;
+    }
+    .dice-controls-row input {
+      background: #0a1e2a;
+      border: 1px solid #1a3a4a;
+      color: #c8dde8;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      padding: 3px 6px;
+      border-radius: 3px;
+      width: 48px;
+      text-align: center;
+    }
+    .dice-result { text-align: center; margin-bottom: 8px; }
+    .dice-result-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #4a7a8a;
+      margin-bottom: 2px;
+    }
+    .dice-result-value {
+      font-family: 'Cinzel', serif;
+      font-size: 1.8rem;
+      color: #d4a843;
+      line-height: 1;
+    }
+    .dice-result-detail {
+      font-size: 0.65rem;
+      color: #4a7a8a;
+      margin-top: 2px;
+    }
+    .dice-history { border-top: 1px solid #0f2535; padding-top: 8px; margin-top: 4px; }
+    .dice-history-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.65rem;
+      padding: 2px 0;
+      color: #3a6a7a;
+    }
+    .dice-hist-expr { color: #4a7a8a; }
+    .dice-hist-val { color: #2a8a8a; }
+
+    /* === MATERIALS DROPDOWN === */
+    .materials-dropdown-wrap { position: relative; }
+    .materials-menu {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      background: #071824;
+      border: 1px solid #1a3a4a;
+      border-radius: 4px;
+      min-width: 180px;
+      z-index: 100;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    }
+    .materials-menu.hidden { display: none; }
+    .materials-menu button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 7px 12px;
+      background: none;
+      border: none;
+      border-bottom: 1px solid #0f2535;
+      color: #8ab8c8;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .materials-menu button:last-child { border-bottom: none; }
+    .materials-menu button:hover { background: #0f2535; color: #a8d8e8; }
+    .materials-menu button.mat-active { color: #2ab8d0; }
+    .materials-menu .mat-divider { border: none; border-top: 1px solid #0f2535; margin: 2px 0; }
+
+    /* === HELP MODAL === */
+    .help-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.72);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .help-overlay.hidden { display: none; }
+    .sr-modal {
+      background: #071824;
+      border: 1px solid #1a3a4a;
+      border-radius: 8px;
+      padding: 24px;
+      max-width: 360px;
+      width: 90%;
+      position: relative;
+    }
+    .sr-dice-count {
+      font-size: 0.85rem;
+      color: #8ab8c8;
+      margin-bottom: 14px;
+    }
+    .sr-picker {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .sr-picker-val {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #a8d8e8;
+      min-width: 28px;
+      text-align: center;
+    }
+    .sr-roll-list {
+      margin-bottom: 14px;
+      font-size: 0.82rem;
+      color: #8ab8c8;
+      line-height: 2;
+    }
+    .sr-roll-row {
+      display: flex;
+      justify-content: space-between;
+    }
+    .sr-total {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #a8d8e8;
+      margin-bottom: 16px;
+    }
+    .sr-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .help-modal {
+      background: #071824;
+      border: 1px solid #1a3a4a;
+      border-radius: 8px;
+      padding: 24px;
+      max-width: 480px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    .help-modal h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 1rem;
+      color: #a8d8e8;
+      margin-bottom: 16px;
+      padding-right: 24px;
+    }
+    .help-modal h3 {
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #4a8a9a;
+      margin: 14px 0 4px;
+    }
+    .help-modal p {
+      font-size: 0.8rem;
+      color: #8ab8c8;
+      line-height: 1.5;
+    }
+    .help-close {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      background: none;
+      border: none;
+      color: #4a7a8a;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+    .help-close:hover { color: #a8d8e8; }
+    .btn-help {
+      background: #0a1e2a;
+      border: 1px solid #1a3a4a;
+      color: #5a8a9a;
+      border-radius: 4px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-family: 'Inter', sans-serif;
+    }
+    .btn-help:hover { border-color: #4a8a9a; color: #a8d8e8; }
+
+    /* === CONDITIONS DROPDOWN === */
+    .conditions-dropdown-wrap { position: relative; }
+    .conditions-panel {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      background: #071824;
+      border: 1px solid #1a3a4a;
+      border-radius: 4px;
+      width: 300px;
+      max-height: 420px;
+      overflow-y: auto;
+      z-index: 100;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    }
+    .conditions-panel.hidden { display: none; }
+    .condition-entry {
+      padding: 8px 12px;
+      border-bottom: 1px solid #0f2535;
+    }
+    .condition-entry:last-child { border-bottom: none; }
+    .condition-name {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #a8d8e8;
+      margin-bottom: 3px;
+    }
+    .condition-effect {
+      font-size: 0.72rem;
+      color: #6a9aaa;
+      line-height: 1.45;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <header id="app-header"></header>
+  <div class="columns">
+    <div class="panel" id="panel-character">
+      <div class="panel-title">Character</div>
+    </div>
+    <div class="panel" id="panel-resources">
+      <div id="status-section"></div>
+      <hr class="divider">
+      <div id="attacks-section-wrap"></div>
+      <hr class="divider">
+      <div id="slots-section"></div>
+    </div>
+    <div class="panel" id="panel-right">
+      <div id="inventory-wrap"></div>
+      <hr class="divider">
+      <div id="feats-wrap"></div>
+      <hr class="divider">
+      <div id="skills-wrap"></div>
+    </div>
+  </div>
+</div>
+<div id="help-overlay" class="help-overlay hidden" onclick="closeHelpOnBackdrop(event)">
+  <div class="help-modal">
+    <button class="help-close" onclick="closeHelp()">✕</button>
+    <h2>Quick Start Guide</h2>
+    <h3>Editing Stats</h3>
+    <p>Click any stat value to edit it directly. For sections with a ✏ icon, click it to open a multi-field edit mode, then click Save.</p>
+    <h3>HP</h3>
+    <p>Use − / + to adjust current HP. "Set" jumps to any value. Click the ✏ icon to edit max HP and temp HP.</p>
+    <h3>Spell Slots</h3>
+    <p>Click a pip to use or restore a spell slot. All slots refill on Long Rest. Use the ✏ icon to set your spellcasting ability, Spell Save DC, and Spell Attack bonus.</p>
+    <h3>Prepared Spells</h3>
+    <p>Below the slot pips, use <strong>+</strong> to add a spell (enter name and level). Click a spell name to expand its notes — double-click to edit them. Double-click the spell name to rename it. Remove a spell with ✕. Your list persists across sessions and is fully flexible — add or remove spells freely.</p>
+    <h3>Skills &amp; Saves</h3>
+    <p>Click the pip next to a skill or save to cycle proficiency: hollow → teal (proficient) → ring (expertise).</p>
+    <h3>Status</h3>
+    <p>Track active spells, HP Effects (Aid, Heroes' Feast, etc.), and conditions. Add them with the + buttons in the Status panel.</p>
+    <h3>Inventory</h3>
+    <p>Use <strong>+ Item</strong> or <strong>+ Magic</strong> to add items. Expand an item to see its description — double-click the description to edit it. Magic items can be toggled Equipped or Attuned.</p>
+    <h3>Feats</h3>
+    <p>Add feats with <strong>+ Feat</strong>. Expand a feat to view or edit its description — double-click the description text to edit it directly. Double-click the feat name to rename it.</p>
+    <h3>Short Rest</h3>
+    <p>Open the Rests menu and click <strong>Short Rest</strong>. Choose how many hit dice to spend, then click Roll to see individual results (each die + CON modifier). Click Heal to apply the total to your HP and spend the dice. Cancel at any point to do nothing.</p>
+    <h3>Lore Book</h3>
+    <p>Click <strong>📖 Lore</strong> in the header to open the floating Lore Book panel. Use <strong>+</strong> to create named pages (NPCs, Locations, Factions, etc.). Click the page dropdown to switch between pages. Use <strong>✎</strong> to rename the active page and <strong>✕</strong> to delete it. Type directly in the panel to edit — content saves automatically. Use <strong>Export</strong> to download your lore as a JSON backup, and <strong>Import</strong> to restore it.</p>
+    <h3>Stat Block Viewer</h3>
+    <p>Drag a PDF or image onto the page to load a stat block. Drag the viewer panel to reposition it.</p>
+    <h3>Saving</h3>
+    <p>Everything saves automatically to this browser. Use Export / Import (in the Rests menu) to back up or transfer your character.</p>
+  </div>
+</div>
+<div id="short-rest-overlay" class="help-overlay hidden" onclick="srCloseOnBackdrop(event)">
+  <div class="sr-modal">
+    <button class="help-close" onclick="closeShortRest()">✕</button>
+    <h2 style="font-family:'Cinzel',serif;font-size:1rem;color:#a8d8e8;margin-bottom:16px;">Short Rest</h2>
+    <div id="sr-body"></div>
+  </div>
+</div>
+<div id="lore-panel">
+  <div class="panel-resize-handle panel-resize-n"  onmousedown="startLoreResize(event,'n')"></div>
+  <div class="panel-resize-handle panel-resize-e"  onmousedown="startLoreResize(event,'e')"></div>
+  <div class="panel-resize-handle panel-resize-w"  onmousedown="startLoreResize(event,'w')"></div>
+  <div class="panel-resize-handle panel-resize-s"  onmousedown="startLoreResize(event,'s')"></div>
+  <div class="panel-resize-handle panel-resize-nw" onmousedown="startLoreResize(event,'nw')"></div>
+  <div class="panel-resize-handle panel-resize-ne" onmousedown="startLoreResize(event,'ne')"></div>
+  <div class="panel-resize-handle panel-resize-se" onmousedown="startLoreResize(event,'se')"></div>
+  <div class="panel-resize-handle panel-resize-sw" onmousedown="startLoreResize(event,'sw')"></div>
+  <div id="lore-titlebar">
+    <span class="lore-panel-title">📖 Lore Book</span>
+    <div style="display:flex;gap:4px;align-items:center;">
+      <button id="lore-minimize-btn" class="stat-panel-btn" onclick="toggleLoreMinimize()" title="Minimize">—</button>
+      <button class="stat-panel-btn" onclick="toggleLorePanel()" title="Close">✕</button>
+    </div>
+  </div>
+  <div id="lore-subheader">
+    <div id="lore-page-dropdown-wrap" class="materials-dropdown-wrap">
+      <button class="formula-dropdown-btn" onclick="toggleLorePageMenu(event)" id="lore-page-btn">— no pages —</button>
+      <div id="lore-page-menu" class="materials-menu hidden"></div>
+    </div>
+    <div style="display:flex;gap:4px;">
+      <button class="btn-sm" onclick="renameLorePage()" title="Rename page">✎</button>
+      <button class="btn-sm" onclick="deleteLorePage()" title="Delete page">✕</button>
+      <button class="btn-sm" onclick="addLorePage()">+</button>
+    </div>
+  </div>
+  <div id="lore-content">
+    <div id="lore-empty" style="display:none;">No pages yet — click + to add one</div>
+    <textarea id="lore-textarea" oninput="updateLoreContent(this.value)" placeholder="Write your lore here…"></textarea>
+  </div>
+  <div id="lore-footer">
+    <button class="btn-sm" onclick="exportLore()">Export</button>
+    <button class="btn-sm" onclick="importLore()">Import</button>
+  </div>
+</div>
+<div id="drag-shield"></div>
+<div id="stat-panel">
+  <div class="panel-resize-handle panel-resize-n"  onmousedown="startPanelResize(event,'n')"></div>
+  <div class="panel-resize-handle panel-resize-e"  onmousedown="startPanelResize(event,'e')"></div>
+  <div class="panel-resize-handle panel-resize-w"  onmousedown="startPanelResize(event,'w')"></div>
+  <div class="panel-resize-handle panel-resize-s"  onmousedown="startPanelResize(event,'s')"></div>
+  <div class="panel-resize-handle panel-resize-nw" onmousedown="startPanelResize(event,'nw')"></div>
+  <div class="panel-resize-handle panel-resize-ne" onmousedown="startPanelResize(event,'ne')"></div>
+  <div class="panel-resize-handle panel-resize-se" onmousedown="startPanelResize(event,'se')"></div>
+  <div class="panel-resize-handle panel-resize-sw" onmousedown="startPanelResize(event,'sw')"></div>
+  <div id="stat-titlebar">
+    <span class="stat-panel-title">Stat Block Viewer</span>
+    <div style="display:flex;gap:4px;">
+      <button id="stat-minimize-btn" onclick="toggleStatMinimize()" title="Minimize">—</button>
+      <button id="stat-close-btn" onclick="closeStatPanel()" title="Close">✕</button>
+    </div>
+  </div>
+  <div id="stat-zoom-controls">
+    <button class="btn-sm" onclick="adjustZoom(-0.25)">−</button>
+    <span class="zoom-label" id="zoom-display">100%</span>
+    <button class="btn-sm" onclick="adjustZoom(0.25)">+</button>
+    <button class="btn-sm" onclick="resetZoom()">Reset</button>
+  </div>
+  <div id="stat-preview">
+    <div class="stat-preview-hint">Drop a stat block image or PDF anywhere</div>
+  </div>
+  <div id="stat-thumbs">
+    <div class="drop-hint-strip">Drop files here</div>
+  </div>
+</div>
+<script>
+  // === STATE ===
+  const DEFAULTS = {
+    characterName: 'Character',
+    hp: { current: 100, max: 100, temp: 0 },
+    hitDice: { max: 0, current: 0, dieType: 'd8', open: false },
+    slots: [4, 3, 3, 3, 3, 2, 2, 1, 1],
+    activeSpells: [],
+    conditions: [],
+    immunities: [],
+    resistances: [],
+    immResOpen: false,
+    layout: { leftW: 260, rightW: 360 },
+    stats: {
+      ac: 15,
+      str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10,
+      savStr: 0, savDex: 0, savCon: 0, savInt: 0, savWis: 0, savCha: 0,
+      passPerc: 10,
+      levelLabel: '1 Fighter',
+      initiative: 0,
+      speed: 30,
+      speedSwim: 0, speedClimb: 0, speedFly: 0
+    },
+    profBonus: 2,
+    spellcastingAbility: 'wis',
+    spellDCOverride: null,
+    spellAtkOverride: null,
+    slotsVisible: true,
+    senses: { truesight: 0, blindsight: 0, tremorsense: 0 },
+    sensesOpen: false,
+    charOpen: true,
+    statsOpen: true,
+    scoresOpen: true,
+    savesOpen: true,
+    attacks: [],
+    items: [],
+    inventoryOpen: false,
+    attunementMax: 3,
+    currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
+    statusOpen: true,
+    spellsOpen: true,
+    feats: [],
+    featsOpen: true,
+    preparedSpells: [],
+    preparedSpellsOpen: true,
+    loreBook: [],
+    loreActiveId: null,
+    saveProfs: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 },
+    hpEffects: {
+      aid:            { active: false, value: 5 },
+      heroesFeast:    { active: false, value: 0 },
+      maxHpReduction: { active: false, value: 0 },
+    },
+    skillsOpen: true,
+    skills: {
+      athletics: 0,
+      acrobatics: 0, sleightOfHand: 0, stealth: 0,
+      arcana: 0, history: 0, investigation: 0, nature: 0, religion: 0,
+      animalHandling: 0, insight: 0, medicine: 0, perception: 0, survival: 0,
+      deception: 0, intimidation: 0, performance: 0, persuasion: 0,
+    },
+    customSkills: [],
+    skillBonuses: {},
+  };
+
+  const STORAGE_KEY = 'talent_companion_v1';
+
+  function loadState() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULTS));
+    } catch { return JSON.parse(JSON.stringify(DEFAULTS)); }
+  }
+
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  let state = loadState();
+  let diceHistory = [];   // max 5 entries: { expr, total, detail }
+  let diceModifier = 0;
+  let diceCount = 1;
+  let diceMenuOpen = false;
+  let srDiceToSpend = 1;
+  let srRolls = [];        // array of { roll, conMod, total }
+  let srPhase = 'pick';    // 'pick' | 'rolled'
+  // Migrate older saved states that lack newer fields
+  if (!state.hitDice) state.hitDice = { max: 0, current: 0, dieType: 'd8', open: false };
+  if (state.hitDice.open === undefined) state.hitDice.open = false;
+  if (!state.stats) state.stats = { ...DEFAULTS.stats };
+  if (!state.immunities) state.immunities = [];
+  if (!state.resistances) state.resistances = [];
+  if (state.immResOpen === undefined) state.immResOpen = false;
+  if (!state.activeSpells) state.activeSpells = [];
+  if (!state.conditions) state.conditions = [];
+  if (!state.layout) state.layout = { leftW: 260, rightW: 300 };
+  if (state.stats.levelLabel === undefined) state.stats.levelLabel = '1 Fighter';
+  if (state.stats.initiative === undefined) state.stats.initiative = 0;
+  if (state.stats.speed === undefined) state.stats.speed = 30;
+  if (state.profBonus === undefined) state.profBonus = 2;
+  if (state.spellcastingAbility === undefined) state.spellcastingAbility = 'wis';
+  if (state.spellDCOverride === undefined) state.spellDCOverride = null;
+  if (state.spellAtkOverride === undefined) state.spellAtkOverride = null;
+  if (state.slotsVisible === undefined) state.slotsVisible = true;
+  if (!state.senses) state.senses = { truesight: 0, blindsight: 0, tremorsense: 0 };
+  if (state.sensesOpen === undefined) state.sensesOpen = false;
+  if (!state.attacks) state.attacks = [];
+  // Migrate from old inventory/magicItems to unified items
+  if (state.items === undefined) {
+    state.items = [
+      ...(state.inventory || []).map(i => ({
+        ...i,
+        type: 'normal',
+        equipped: false,
+        attuned: false,
+        description: i.description ?? ''
+      })),
+      ...(state.magicItems || []).map(i => ({
+        ...i,
+        type: 'magic',
+        description: i.description ?? ''
+      }))
+    ];
+    delete state.inventory;
+    delete state.magicItems;
+  }
+  if (!state.items) state.items = [];
+  if (state.inventoryOpen === undefined) state.inventoryOpen = false;
+  if (state.attunementMax === undefined) state.attunementMax = 3;
+  state.items.forEach(i => {
+    if (i.description === undefined) i.description = '';
+    if (i.qty === undefined) i.qty = '1';
+    if (i.type === undefined) i.type = 'normal';
+    if (i.equipped === undefined) i.equipped = false;
+    if (i.attuned === undefined) i.attuned = false;
+    if (i.chargeMax === undefined) i.chargeMax = 0;
+    if (i.chargeCurrent === undefined) i.chargeCurrent = 0;
+  });
+  if (state.characterName === undefined) state.characterName = 'Character';
+  if (state.statusOpen === undefined) state.statusOpen = true;
+  if (state.spellsOpen === undefined) state.spellsOpen = true;
+  if (!state.feats) state.feats = [];
+  if (state.featsOpen === undefined) state.featsOpen = true;
+  state.feats.forEach(f => {
+    if (f.description === undefined) f.description = '';
+  });
+  if (state.layout.rightW < 340) state.layout.rightW = 360;
+  if (!state.saveProfs) state.saveProfs = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 };
+  if (state.charOpen   === undefined) state.charOpen   = true;
+  if (state.statsOpen  === undefined) state.statsOpen  = true;
+  if (state.scoresOpen === undefined) state.scoresOpen = true;
+  if (state.savesOpen  === undefined) state.savesOpen  = true;
+  if (state.skillsOpen === undefined) state.skillsOpen = true;
+  if (!state.skills) state.skills = { ...DEFAULTS.skills };
+  if (!state.customSkills) state.customSkills = [];
+  if (!state.skillBonuses) state.skillBonuses = {};
+  if (!state.currency) state.currency = { pp: 0, gp: 0, sp: 0, cp: 0 };
+  if (!state.hpEffects) state.hpEffects = JSON.parse(JSON.stringify(DEFAULTS.hpEffects));
+  if (state.stats.speedSwim === undefined) state.stats.speedSwim = 0;
+  if (state.stats.speedClimb === undefined) state.stats.speedClimb = 0;
+  if (state.stats.speedFly === undefined) state.stats.speedFly = 0;
+  ['savStr','savDex','savCon','savInt','savWis','savCha'].forEach(k => { if (state.stats[k] === undefined) state.stats[k] = 0; });
+  if (!state.preparedSpells) state.preparedSpells = [];
+  if (state.preparedSpellsOpen === undefined) state.preparedSpellsOpen = true;
+  if (!state.loreBook) state.loreBook = [];
+  if (state.loreActiveId === undefined) state.loreActiveId = null;
+  function update(mutatorFn) {
+    mutatorFn(state);
+    saveState();
+    render();
+  }
+
+  // === SECTION EDIT MODE ===
+  let editSection = null;
+  let speedExpanded = false;
+  let itemDescOpen = {};
+  let itemDescEdit = null; // id of item currently being edited
+  let helpOpen = false;
+
+  function sectionTitle(label, key, toggleFn, isOpen) {
+    if (!key) return `<div class="panel-title">${label}</div>`;
+    const editing = editSection === key;
+    const chevron = toggleFn
+      ? `<button class="btn-sm" onclick="event.stopPropagation();${toggleFn}()" style="padding:0 6px;">${isOpen ? '▲' : '▼'}</button>`
+      : '';
+    const titleOnClick = toggleFn ? `onclick="${toggleFn}()"` : '';
+    return `
+      <div class="panel-title" ${titleOnClick} style="display:flex;align-items:center;justify-content:space-between;${toggleFn ? 'cursor:pointer;' : ''}">
+        <span>${label}</span>
+        ${editing
+          ? `<span class="section-edit-controls">
+               <button class="edit-save-btn" onclick="saveSection('${key}')">Save</button>
+               <button class="edit-cancel-btn" onclick="setEditSection(null)">✕</button>
+             </span>`
+          : `<span style="display:flex;gap:4px;align-items:center;">
+               <button class="edit-pencil-btn" onclick="event.stopPropagation();setEditSection('${key}')" title="Edit">✏</button>
+               ${chevron}
+             </span>`
+        }
+      </div>`;
+  }
+
+  function setEditSection(key) {
+    editSection = key;
+    const expandMap = { hp: 'charOpen', combat: 'statsOpen', scores: 'scoresOpen', saves: 'savesOpen' };
+    if (key && expandMap[key] && !state[expandMap[key]]) { state[expandMap[key]] = true; saveState(); }
+    if (key === 'senses' && !state.sensesOpen) { state.sensesOpen = true; saveState(); }
+    render();
+  }
+  function toggleSpeedExpand() { speedExpanded = !speedExpanded; renderHP(); }
+
+  function saveSection(key) {
+    const g = id => document.getElementById(id)?.value;
+    const vals = {};
+    if (key === 'hp') {
+      vals.current = g('edit-hp-current');
+      vals.max     = g('edit-hp-max');
+      vals.temp    = g('edit-hp-temp');
+    } else if (key === 'combat') {
+      ['ac','initiative','speed','speedSwim','speedClimb','speedFly'].forEach(k => vals[k] = g('edit-' + k));
+      vals.profBonus = g('edit-profbonus');
+      vals.passPerc = g('edit-passperc');
+    } else if (key === 'scores') {
+      ['str','dex','con','int','wis','cha'].forEach(k => vals[k] = g('edit-' + k));
+    } else if (key === 'saves') {
+      ['savStr','savDex','savCon','savInt','savWis','savCha'].forEach(k => vals[k] = g('edit-' + k));
+    } else if (key === 'spells') {
+      vals.spellDC  = g('edit-spelldc');
+      vals.spellAtk = g('edit-spellatk');
+    } else if (key === 'senses') {
+      ['truesight','blindsight','tremorsense'].forEach(k => vals[k] = g('edit-' + k));
+    }
+    editSection = null;  // clear before render() fires inside update()
+    update(s => {
+      if (key === 'hp') {
+        const max = +vals.max;
+        if (!isNaN(max) && max >= 1)     s.hp.max     = max;
+        if (!isNaN(+vals.current))       s.hp.current = Math.max(0, Math.min(s.hp.max, +vals.current));
+        if (!isNaN(+vals.temp))          s.hp.temp    = Math.max(0, +vals.temp);
+      } else if (key === 'combat') {
+        if (!isNaN(+vals.ac))         s.stats.ac         = +vals.ac;
+        if (!isNaN(+vals.initiative))  s.stats.initiative  = +vals.initiative;
+        if (!isNaN(+vals.speed))       s.stats.speed       = +vals.speed;
+        if (!isNaN(+vals.speedSwim))   s.stats.speedSwim   = Math.max(0, +vals.speedSwim);
+        if (!isNaN(+vals.speedClimb))  s.stats.speedClimb  = Math.max(0, +vals.speedClimb);
+        if (!isNaN(+vals.speedFly))    s.stats.speedFly    = Math.max(0, +vals.speedFly);
+        if (!isNaN(+vals.profBonus))  { s.profBonus = +vals.profBonus; s.spellDCOverride = null; s.spellAtkOverride = null; }
+        if (!isNaN(+vals.passPerc))   s.stats.passPerc    = +vals.passPerc;
+      } else if (key === 'scores') {
+        ['str','dex','con','int','wis','cha'].forEach(k => {
+          if (!isNaN(+vals[k])) s.stats[k] = Math.max(1, Math.min(30, +vals[k]));
+        });
+      } else if (key === 'saves') {
+        ['savStr','savDex','savCon','savInt','savWis','savCha'].forEach(k => {
+          if (!isNaN(+vals[k])) s.stats[k] = +vals[k];
+        });
+      } else if (key === 'spells') {
+        if (vals.spellDC  !== undefined) s.spellDCOverride  = vals.spellDC.trim()  === '' ? null : +vals.spellDC;
+        if (vals.spellAtk !== undefined) s.spellAtkOverride = vals.spellAtk.trim() === '' ? null : +vals.spellAtk;
+      } else if (key === 'senses') {
+        ['truesight','blindsight','tremorsense'].forEach(k => {
+          if (!isNaN(+vals[k])) s.senses[k] = Math.max(0, +vals[k]);
+        });
+      }
+    });
+  }
+
+  // === HP PANEL ===
+  function renderHP() {
+    const el = document.getElementById('panel-character');
+    const { hp } = state;
+    const st = state.stats;
+    const basePct = Math.max(0, Math.min(100, (hp.current / hp.max) * 100));
+    const hpCls = basePct > 50 ? 'hp-healthy' : basePct > 25 ? 'hp-hurt' : 'hp-critical';
+
+    const isHP     = editSection === 'hp';
+    const isStats  = editSection === 'combat';
+    const isScores = editSection === 'scores';
+    const isSaves  = editSection === 'saves';
+
+    el.innerHTML = `
+      ${sectionTitle('Character', 'hp', 'toggleCharOpen', state.charOpen)}
+
+      ${state.charOpen ? `
+      <div class="hp-section">
+        <div class="hp-label">Base Form</div>
+        <div class="hp-bar-track"><div class="hp-bar-fill ${hpCls}" style="width:${basePct}%"></div></div>
+        ${isHP ? `
+          <div class="stat-row"><span class="stat-label">Current HP</span><input class="edit-input-sm" id="edit-hp-current" type="number" min="0" value="${hp.current}"></div>
+          <div class="stat-row"><span class="stat-label">Max HP</span><input class="edit-input-sm" id="edit-hp-max" type="number" min="1" value="${hp.max}"></div>
+          <div class="stat-row"><span class="stat-label">Temp HP</span><input class="edit-input-sm" id="edit-hp-temp" type="number" min="0" value="${hp.temp}"></div>
+        ` : `
+          <div class="hp-controls">
+            <span class="hp-display">${hp.current} / ${hp.max}</span>
+            <button class="btn-sm" onclick="adjustHP(-1)">−</button>
+            <button class="btn-sm" onclick="adjustHP(1)">+</button>
+            <button class="btn-sm" onclick="promptHP()">Set</button>
+          </div>
+          <div class="temp-hp">Temp HP: <strong>${hp.temp}</strong>
+            <button class="btn-sm" onclick="adjustTemp(-1)">−</button>
+            <button class="btn-sm" onclick="adjustTemp(1)">+</button>
+            <button class="btn-sm" onclick="promptTemp()">Set</button>
+          </div>
+        `}
+      </div>` : ''}
+
+      ${state.charOpen ? `<div style="margin-top:4px;padding:2px 0;">
+        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:3px 0;" onclick="toggleHitDice()">
+          <span style="font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:#4a7a8a;">Hit Dice</span>
+          <span style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:0.7rem;color:#5a8a9a;">${state.hitDice.current}/${state.hitDice.max} ${state.hitDice.dieType}</span>
+            <span style="font-size:0.65rem;color:#3a6a7a;">${state.hitDice.open ? '▲' : '▼'}</span>
+          </span>
+        </div>
+        ${state.hitDice.open ? `
+          <div style="padding:4px 0 2px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span style="font-size:0.72rem;color:#5a8a9a;">Max</span>
+              <input type="number" min="0" max="30" value="${state.hitDice.max}"
+                onchange="setHitDiceMax(this.value)"
+                style="width:36px;background:#0f2535;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.72rem;text-align:center;">
+              <select onchange="setHitDieType(this.value)"
+                style="background:#0f2535;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.72rem;">
+                ${['d6','d8','d10','d12'].map(d => `<option value="${d}" ${state.hitDice.dieType === d ? 'selected' : ''}>${d}</option>`).join('')}
+              </select>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:2px;">
+              ${state.hitDice.max === 0
+                ? '<span style="font-size:0.72rem;color:#2a4a5a;">Set a max to track hit dice</span>'
+                : Array.from({length: state.hitDice.max}, (_, idx) => `
+                    <span onclick="clickHitDie(${idx})"
+                      title="${idx < state.hitDice.current ? 'Click to spend' : 'Click to restore'}"
+                      style="cursor:pointer;font-size:1.1rem;line-height:1;color:${idx < state.hitDice.current ? '#e05070' : '#2a4a5a'};">
+                      ${idx < state.hitDice.current ? '♥' : '♡'}
+                    </span>
+                  `).join('')
+              }
+            </div>
+          </div>
+        ` : ''}
+      </div>` : ''}
+
+      <hr class="divider">
+      ${sectionTitle('Stats', 'combat', 'toggleStatsOpen', state.statsOpen)}
+      ${state.statsOpen ? isStats ? `
+        <div class="stat-row"><span class="stat-label">AC</span><input class="edit-input-sm" id="edit-ac" type="number" value="${st.ac}"></div>
+        <div class="stat-row"><span class="stat-label">Initiative</span><input class="edit-input-sm" id="edit-initiative" type="number" value="${st.initiative}"></div>
+        <div class="stat-row"><span class="stat-label">Walk ft.</span><input class="edit-input-sm" id="edit-speed" type="number" value="${st.speed}"></div>
+        <div class="stat-row"><span class="stat-label">Swim ft.</span><input class="edit-input-sm" id="edit-speedSwim" type="number" value="${st.speedSwim}"></div>
+        <div class="stat-row"><span class="stat-label">Climb ft.</span><input class="edit-input-sm" id="edit-speedClimb" type="number" value="${st.speedClimb}"></div>
+        <div class="stat-row"><span class="stat-label">Fly ft.</span><input class="edit-input-sm" id="edit-speedFly" type="number" value="${st.speedFly}"></div>
+        <div class="stat-row"><span class="stat-label">Proficiency</span><input class="edit-input-sm" id="edit-profbonus" type="number" value="${state.profBonus}"></div>
+        <div class="stat-row"><span class="stat-label">Pass. Percep.</span><input class="edit-input-sm" id="edit-passperc" type="number" value="${st.passPerc}"></div>
+      ` : `
+        <div class="stat-row"><span class="stat-label">AC</span><span class="stat-value editable-stat" onclick="editStat('ac')" title="Click to edit">${st.ac}</span></div>
+        <div class="stat-row"><span class="stat-label">Initiative</span><span class="stat-value editable-stat" onclick="editStat('initiative')" title="Click to edit">+${st.initiative}</span></div>
+        <div class="stat-row">
+          <span class="stat-label">Speed
+            <button class="btn-sm" onclick="toggleSpeedExpand()" title="${speedExpanded ? 'Collapse' : 'Expand'} speeds" style="font-size:0.6rem;padding:0 4px;margin-left:4px;">${speedExpanded ? '▲' : '▶'}</button>
+          </span>
+          <span class="stat-value editable-stat" onclick="editStat('speed')" title="Click to edit">${st.speed} ft.</span>
+        </div>
+        ${speedExpanded ? `
+          <div class="stat-row" style="padding-left:12px;font-size:0.8rem;">
+            <span class="stat-label" style="color:#5a8a9a;">Swim</span><span class="stat-value editable-stat" onclick="editStat('speedSwim')" title="Click to edit">${st.speedSwim} ft.</span>
+          </div>
+          <div class="stat-row" style="padding-left:12px;font-size:0.8rem;">
+            <span class="stat-label" style="color:#5a8a9a;">Climb</span><span class="stat-value editable-stat" onclick="editStat('speedClimb')" title="Click to edit">${st.speedClimb} ft.</span>
+          </div>
+          <div class="stat-row" style="padding-left:12px;font-size:0.8rem;">
+            <span class="stat-label" style="color:#5a8a9a;">Fly</span><span class="stat-value editable-stat" onclick="editStat('speedFly')" title="Click to edit">${st.speedFly} ft.</span>
+          </div>
+        ` : ''}
+        <div class="stat-row"><span class="stat-label">Proficiency</span><span class="stat-value editable-stat" onclick="editProfBonus()" title="Click to edit">+${state.profBonus}</span></div>
+        <div class="stat-row"><span class="stat-label">Pass. Percep.</span><span class="stat-value editable-stat" onclick="editStat('passPerc')" title="Click to edit">${st.passPerc}</span></div>
+      ` : ''}
+
+      <hr class="divider">
+      ${sectionTitle('Ability Scores', 'scores', 'toggleScoresOpen', state.scoresOpen)}
+      ${state.scoresOpen ? `<div class="saves-grid">
+        ${[['STR','str'],['DEX','dex'],['CON','con'],['INT','int'],['WIS','wis'],['CHA','cha']].map(([name, key]) => {
+          const score = st[key];
+          const mod = Math.floor((score - 10) / 2);
+          const sign = mod >= 0 ? '+' : '';
+          return isScores
+            ? `<div class="save-row"><span class="save-name">${name}</span><input class="edit-input-sm" id="edit-${key}" type="number" min="1" max="30" value="${score}"></div>`
+            : `<div class="save-row"><span class="save-name">${name}</span><span class="save-val editable-stat" onclick="editStat('${key}')" title="Click to edit">${score} <span style="color:#5a8a9a;font-weight:400">(${sign}${mod})</span></span></div>`;
+        }).join('')}
+      </div>` : ''}
+
+      <hr class="divider">
+      ${sectionTitle('Saves', 'saves', 'toggleSavesOpen', state.savesOpen)}
+      ${state.savesOpen ? `<div class="saves-grid">
+        ${[['STR','str'],['DEX','dex'],['CON','con'],['INT','int'],['WIS','wis'],['CHA','cha']].map(([name, abKey]) => {
+          const savKey = 'sav' + abKey.charAt(0).toUpperCase() + abKey.slice(1);
+          const pipState = state.saveProfs[abKey];
+          const pipCls = pipState === 2 ? 'expertise' : pipState === 1 ? 'prof' : '';
+          const pipTitle = ['Not proficient', 'Proficient', 'Expertise'][pipState];
+          const abilityMod = Math.floor(((state.stats[abKey] ?? 10) - 10) / 2);
+          const profBonus = pipState === 2 ? state.profBonus * 2 : pipState === 1 ? state.profBonus : 0;
+          const flatBonus = state.stats[savKey] ?? 0;
+          const total = abilityMod + profBonus + flatBonus;
+          const sign = total >= 0 ? '+' : '';
+          if (isSaves) {
+            return `<div class="save-row">
+                <span class="save-name">${name}</span>
+                <input class="edit-input-sm" id="edit-${savKey}" type="number" value="${flatBonus}" style="width:52px;" title="Flat bonus (on top of mod + prof)">
+              </div>`;
+          }
+          return `<div class="save-row">
+              <span style="display:flex;align-items:center;gap:4px;">
+                <span class="prof-pip ${pipCls}" onclick="cycleSaveProf('${abKey}')" title="${pipTitle}"></span>
+                <span class="save-name">${name}</span>
+              </span>
+              <span class="save-val">${sign}${total}${flatBonus !== 0 ? `<span style="font-size:0.65rem;color:#c8904a;margin-left:2px;">${flatBonus >= 0 ? '+' : ''}${flatBonus}</span>` : ''}</span>
+            </div>`;
+        }).join('')}
+      </div>` : ''}
+
+      ${renderSenses()}
+
+      <hr class="divider">
+      ${renderImmRes()}
+    `;
+  }
+
+  function toggleCharOpen()   { update(s => s.charOpen   = !s.charOpen); }
+  function toggleStatsOpen()  { update(s => s.statsOpen  = !s.statsOpen); }
+  function toggleScoresOpen() { update(s => s.scoresOpen = !s.scoresOpen); }
+  function toggleSavesOpen()  { update(s => s.savesOpen  = !s.savesOpen); }
+  function toggleHitDice() {
+    update(s => s.hitDice.open = !s.hitDice.open);
+  }
+  function clickHitDie(idx) {
+    update(s => {
+      s.hitDice.current = s.hitDice.current > idx ? idx : idx + 1;
+    });
+  }
+  function setHitDiceMax(val) {
+    const max = Math.max(0, parseInt(val) || 0);
+    update(s => {
+      s.hitDice.max = max;
+      s.hitDice.current = Math.min(s.hitDice.current, max);
+    });
+  }
+  function setHitDieType(val) {
+    update(s => s.hitDice.dieType = val);
+  }
+  function adjustHP(delta) {
+    update(s => s.hp.current = Math.max(0, Math.min(s.hp.max, s.hp.current + delta)));
+  }
+  function adjustTemp(delta) {
+    update(s => s.hp.temp = Math.max(0, s.hp.temp + delta));
+  }
+  function promptTemp() {
+    const val = prompt('Set Temp HP:', state.hp.temp);
+    if (val !== null && !isNaN(+val)) update(s => s.hp.temp = Math.max(0, +val));
+  }
+  function promptHP() {
+    const val = prompt('Set current HP:', state.hp.current);
+    if (val !== null && !isNaN(+val)) update(s => s.hp.current = Math.max(0, Math.min(s.hp.max, +val)));
+  }
+
+  function getSpellMod() {
+    const key = state.spellcastingAbility;
+    const score = state.stats[key] ?? 10;
+    return Math.floor((score - 10) / 2);
+  }
+  function getSpellDC() {
+    if (state.spellDCOverride !== null) return state.spellDCOverride;
+    return 8 + state.profBonus + getSpellMod();
+  }
+  function getSpellAtk() {
+    if (state.spellAtkOverride !== null) return state.spellAtkOverride;
+    return state.profBonus + getSpellMod();
+  }
+  function editSpellDC() {
+    const auto = 8 + state.profBonus + getSpellMod();
+    const val = prompt(`Spell Save DC (auto: ${auto}, blank to reset):`, state.spellDCOverride ?? auto);
+    if (val === null) return;
+    if (val.trim() === '') { update(s => s.spellDCOverride = null); return; }
+    if (!isNaN(+val)) update(s => s.spellDCOverride = +val);
+  }
+  function editSpellAtk() {
+    const auto = state.profBonus + getSpellMod();
+    const val = prompt(`Spell Attack (auto: +${auto}, blank to reset):`, state.spellAtkOverride ?? auto);
+    if (val === null) return;
+    if (val.trim() === '') { update(s => s.spellAtkOverride = null); return; }
+    if (!isNaN(+val)) update(s => s.spellAtkOverride = +val);
+  }
+  function setSpellcastingAbility(key) {
+    update(s => {
+      s.spellcastingAbility = key;
+      s.spellDCOverride = null;
+      s.spellAtkOverride = null;
+    });
+  }
+
+  function editProfBonus() {
+    const val = prompt('Proficiency Bonus:', state.profBonus);
+    if (val !== null && !isNaN(+val)) update(s => {
+      s.profBonus = +val;
+      s.spellDCOverride = null;
+      s.spellAtkOverride = null;
+    });
+  }
+  function cycleSaveProf(key) {
+    update(s => s.saveProfs[key] = (s.saveProfs[key] + 1) % 3);
+  }
+
+  // === EDITABLE STATS ===
+  const STAT_LABELS = {
+    ac: 'AC', str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA',
+    savStr: 'STR Save', savDex: 'DEX Save', savCon: 'CON Save',
+    savInt: 'INT Save', savWis: 'WIS Save', savCha: 'CHA Save',
+    passPerc: 'Passive Perception',
+    initiative: 'Initiative modifier', speed: 'Walk speed (ft)',
+    speedSwim: 'Swim speed (ft)', speedClimb: 'Climb speed (ft)', speedFly: 'Fly speed (ft)',
+    levelLabel: 'Level & Class'
+  };
+  const STRING_STAT_KEYS = new Set(['levelLabel']);
+  function editStat(key) {
+    const label = STAT_LABELS[key] || key;
+    const current = state.stats[key];
+    const val = prompt(`Set ${label}:`, current);
+    if (val === null || val.trim() === '') return;
+    if (STRING_STAT_KEYS.has(key)) {
+      update(s => s.stats[key] = val.trim());
+    } else if (!isNaN(+val)) {
+      update(s => s.stats[key] = +val);
+    }
+  }
+
+  // === SENSES ===
+  function toggleSenses() {
+    update(s => s.sensesOpen = !s.sensesOpen);
+  }
+  function editSense(key) {
+    const labels = { truesight: 'Truesight (ft)', blindsight: 'Blindsight (ft)', tremorsense: 'Tremorsense (ft)' };
+    const val = prompt(labels[key] + ':', state.senses[key]);
+    if (val !== null && !isNaN(+val)) update(s => s.senses[key] = Math.max(0, +val));
+  }
+  function renderSenses() {
+    const { senses, sensesOpen } = state;
+    const isEditing = editSection === 'senses';
+    return `
+      <div style="margin-top:8px;">
+        <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
+          <span onclick="toggleSenses()" style="cursor:pointer;flex:1;">Senses <span>${sensesOpen ? '▲' : '▼'}</span></span>
+          ${isEditing
+            ? `<span class="section-edit-controls">
+                 <button class="edit-save-btn" onclick="saveSection('senses')">Save</button>
+                 <button class="edit-cancel-btn" onclick="setEditSection(null)">✕</button>
+               </span>`
+            : `<button class="edit-pencil-btn" onclick="event.stopPropagation();setEditSection('senses')" title="Edit">✏</button>`
+          }
+        </div>
+        ${sensesOpen || isEditing ? `
+          <div class="senses-grid">
+            ${isEditing ? `
+              <div class="stat-row"><span class="stat-label">Truesight</span><input class="edit-input-sm" id="edit-truesight" type="number" value="${senses.truesight}"></div>
+              <div class="stat-row"><span class="stat-label">Blindsight</span><input class="edit-input-sm" id="edit-blindsight" type="number" value="${senses.blindsight}"></div>
+              <div class="stat-row"><span class="stat-label">Tremorsense</span><input class="edit-input-sm" id="edit-tremorsense" type="number" value="${senses.tremorsense}"></div>
+            ` : `
+              <div class="stat-row"><span class="stat-label">Truesight</span><span class="stat-value editable-stat" onclick="editSense('truesight')" title="Click to edit">${senses.truesight} ft</span></div>
+              <div class="stat-row"><span class="stat-label">Blindsight</span><span class="stat-value editable-stat" onclick="editSense('blindsight')" title="Click to edit">${senses.blindsight} ft</span></div>
+              <div class="stat-row"><span class="stat-label">Tremorsense</span><span class="stat-value editable-stat" onclick="editSense('tremorsense')" title="Click to edit">${senses.tremorsense} ft</span></div>
+            `}
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  // === IMMUNITIES & RESISTANCES ===
+  const DMG_TYPES = ['Acid','Bludgeoning','Cold','Fire','Force','Lightning','Necrotic','Piercing','Poison','Psychic','Radiant','Slashing','Thunder'];
+
+  function renderImmRes() {
+    const { immunities: imm, resistances: res, immResOpen: open } = state;
+    const immTags = imm.length ? imm.map(t => `<span class="imm-tag imm">${t}</span>`).join('') : '<span class="imm-none">None</span>';
+    const resTags = res.length ? res.map(t => `<span class="imm-tag res">${t}</span>`).join('') : '<span class="imm-none">None</span>';
+    const chevron = open ? '▲' : '▼';
+    return `
+      <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleImmResOpen()">
+        <span>Immunities &amp; Resistances</span><span style="font-size:0.7rem;opacity:0.6">${chevron}</span>
+      </div>
+      <div class="imm-summary">
+        <div class="imm-row-label">Immune:</div><div class="imm-tags">${immTags}</div>
+        <div class="imm-row-label">Resist:</div><div class="imm-tags">${resTags}</div>
+      </div>
+      ${open ? `
+      <div class="imm-picker">
+        <div class="imm-col-head">Immunity</div><div class="imm-col-head">Resistance</div>
+        ${DMG_TYPES.map(t => `
+          <label class="imm-check ${imm.includes(t)?'active-imm':''}">
+            <input type="checkbox" ${imm.includes(t)?'checked':''} onchange="toggleImmRes('${t}','imm',this.checked)"> ${t}
+          </label>
+          <label class="imm-check ${res.includes(t)?'active-res':''}">
+            <input type="checkbox" ${res.includes(t)?'checked':''} onchange="toggleImmRes('${t}','res',this.checked)"> ${t}
+          </label>
+        `).join('')}
+      </div>` : ''}
+    `;
+  }
+
+  function toggleImmResOpen() {
+    update(s => s.immResOpen = !s.immResOpen);
+  }
+  function toggleImmRes(type, category, checked) {
+    update(s => {
+      const arr = category === 'imm' ? s.immunities : s.resistances;
+      const idx = arr.indexOf(type);
+      if (checked && idx === -1) arr.push(type);
+      if (!checked && idx !== -1) arr.splice(idx, 1);
+    });
+  }
+
+  // === CONDITIONS ===
+  const CONDITION_NAMES = [
+    'Blinded','Charmed','Deafened','Exhaustion 1','Exhaustion 2','Exhaustion 3',
+    'Exhaustion 4','Exhaustion 5','Exhaustion 6',
+    'Frightened','Grappled','Incapacitated','Invisible',
+    'Paralyzed','Petrified','Poisoned','Prone','Restrained','Stunned','Unconscious',
+    'Custom...'
+  ];
+
+  function renderConditions() {
+    const conds = state.conditions;
+    const condListHTML = conds.length === 0
+      ? '<div class="no-conds">No active conditions</div>'
+      : conds.map((c, i) => {
+          const durLabel = c.duration === null
+            ? '<span class="cond-dur permanent">∞</span>'
+            : `<span class="cond-dur">${c.duration}r</span>`;
+          return `
+            <div class="cond-item">
+              <span class="cond-name">${c.name}</span>
+              ${durLabel}
+              <button class="cond-remove" onclick="removeCondition(${i})" title="Remove">✕</button>
+            </div>`;
+        }).join('');
+
+    const optionsHTML = CONDITION_NAMES.map(n =>
+      `<option value="${n}">${n}</option>`
+    ).join('');
+
+    return `
+      <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Conditions</span>
+        ${conds.length > 0 ? `<button class="btn-sm" onclick="tickConditions()" title="Advance one round">Next Turn</button>` : ''}
+      </div>
+      <div class="cond-section">
+        <div class="cond-add-row">
+          <select id="cond-select" onchange="onCondSelectChange(this)">
+            <option value="" disabled selected>Add condition…</option>
+            ${optionsHTML}
+          </select>
+          <input class="cond-dur-input" id="cond-dur" type="text" value="∞" title="Rounds (number) or ∞ for permanent" maxlength="4">
+          <button class="btn-cond-add" onclick="addCondition()">Add</button>
+        </div>
+        <div class="cond-custom-row" id="cond-custom-row">
+          <input id="cond-custom-input" type="text" placeholder="Custom condition name…" style="flex:1;background:#0a1e2a;border:1px solid #1a3a4a;color:#c8dde8;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-family:'Inter',sans-serif;width:100%;">
+        </div>
+        <div class="cond-list">${condListHTML}</div>
+        ${conds.length > 0 ? `<button class="btn-next-turn" onclick="tickConditions()">⟳ Next Turn — Tick Durations</button>` : ''}
+      </div>
+    `;
+  }
+
+  function onCondSelectChange(sel) {
+    const customRow = document.getElementById('cond-custom-row');
+    if (customRow) customRow.classList.toggle('visible', sel.value === 'Custom...');
+  }
+
+  function addCondition() {
+    const sel = document.getElementById('cond-select');
+    const durInput = document.getElementById('cond-dur');
+    const customInput = document.getElementById('cond-custom-input');
+    if (!sel || !sel.value) return;
+    const isCustom = sel.value === 'Custom...';
+    const name = isCustom ? (customInput ? customInput.value.trim() : '') : sel.value;
+    if (!name) return;
+    const rawDur = durInput ? durInput.value.trim() : '∞';
+    const duration = (rawDur === '∞' || rawDur === '' || isNaN(+rawDur))
+      ? null
+      : Math.max(1, Math.round(+rawDur));
+    update(s => {
+      if (!s.conditions) s.conditions = [];
+      s.conditions.push({ name, duration });
+    });
+  }
+
+  function removeCondition(idx) {
+    update(s => s.conditions.splice(idx, 1));
+  }
+
+  function tickConditions() {
+    update(s => {
+      if (!s.conditions) return;
+      s.conditions = s.conditions
+        .map(c => c.duration === null ? c : { ...c, duration: c.duration - 1 })
+        .filter(c => c.duration === null || c.duration > 0);
+    });
+  }
+
+  // === SPELL SLOTS ===
+  const SLOT_MAX = [4, 3, 3, 3, 3, 2, 2, 1, 1];
+
+  function toggleSlotsVisible() {
+    update(s => s.slotsVisible = !s.slotsVisible);
+  }
+  function renderSlotsBody() {
+    const { slots } = state;
+    const ordinals = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th'];
+    return `
+      <div class="slots-grid">
+        ${SLOT_MAX.map((max, i) => `
+          <div class="slot-group">
+            <div class="slot-level-label">${ordinals[i]}</div>
+            <div class="slot-pips">
+              ${Array.from({length: max}, (_, j) => `
+                <div class="pip ${j < slots[i] ? 'full' : 'empty'}"
+                  onclick="toggleSlot(${i}, ${j})"></div>
+              `).join('')}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+  function renderSlots() {
+    const visible = state.slotsVisible;
+    const isSpells = editSection === 'spells';
+    document.getElementById('slots-section').innerHTML = `
+      <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Spellcasting</span>
+        ${isSpells
+          ? `<span class="section-edit-controls">
+               <button class="edit-save-btn" onclick="saveSection('spells')">Save</button>
+               <button class="edit-cancel-btn" onclick="setEditSection(null)">✕</button>
+             </span>`
+          : `<span style="display:flex;gap:4px;align-items:center;">
+               <button class="edit-pencil-btn" onclick="setEditSection('spells')" title="Edit">✏</button>
+               <button class="btn-sm" onclick="toggleSlotsVisible()" style="padding:0 6px;">${visible ? '▲' : '▼'}</button>
+             </span>`
+        }
+      </div>
+      ${visible ? `
+        ${isSpells ? `
+          <div class="stat-row" style="margin-bottom:4px;">
+            <span class="stat-label">Spell Ability</span>
+            <select onchange="setSpellcastingAbility(this.value)" style="background:#0a1e2a;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.8rem;">
+              ${['int','wis','cha'].map(k => `<option value="${k}" ${state.spellcastingAbility === k ? 'selected' : ''}>${k.toUpperCase()}</option>`).join('')}
+            </select>
+          </div>
+          <div class="stat-row"><span class="stat-label">Spell Save DC</span><input class="edit-input-sm" id="edit-spelldc" type="number" placeholder="auto" value="${state.spellDCOverride !== null ? state.spellDCOverride : ''}"></div>
+          <div class="stat-row"><span class="stat-label">Spell Attack</span><input class="edit-input-sm" id="edit-spellatk" type="number" placeholder="auto" value="${state.spellAtkOverride !== null ? state.spellAtkOverride : ''}"></div>
+          <hr class="divider">
+        ` : `
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+            <div class="stat-row" style="flex:1;min-width:80px;">
+              <span class="stat-label">Ability</span>
+              <select onchange="setSpellcastingAbility(this.value)" style="background:#0a1e2a;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.8rem;">
+                ${['int','wis','cha'].map(k => `<option value="${k}" ${state.spellcastingAbility === k ? 'selected' : ''}>${k.toUpperCase()}</option>`).join('')}
+              </select>
+            </div>
+            <div class="stat-row" style="flex:1;min-width:60px;">
+              <span class="stat-label">DC</span>
+              <span class="stat-value editable-stat" onclick="editSpellDC()" title="Click to override">${getSpellDC()}${state.spellDCOverride !== null ? ' <span style="font-size:0.6rem;color:#2a6a7a;">✎</span>' : ''}</span>
+            </div>
+            <div class="stat-row" style="flex:1;min-width:60px;">
+              <span class="stat-label">Atk</span>
+              <span class="stat-value editable-stat" onclick="editSpellAtk()" title="Click to override">+${getSpellAtk()}${state.spellAtkOverride !== null ? ' <span style="font-size:0.6rem;color:#2a6a7a;">✎</span>' : ''}</span>
+            </div>
+          </div>
+          <hr class="divider">
+        `}
+        ${renderSlotsBody()}
+        <hr style="border:none;border-top:1px solid #0c2535;margin:8px 0;">
+        ${renderPreparedSpells()}
+      ` : ''}
+    `;
+  }
+
+  // === PREPARED SPELLS ===
+  function addPreparedSpell() {
+    const name = prompt('Spell name:');
+    if (!name?.trim()) return;
+    const lvlRaw = prompt('Spell level (0–9, use 0 for cantrips):', '1');
+    const level = parseInt(lvlRaw);
+    if (isNaN(level) || level < 0 || level > 9) return;
+    update(s => s.preparedSpells.push({
+      id: Date.now().toString(),
+      name: name.trim(),
+      level,
+      notes: '',
+      open: false,
+    }));
+  }
+
+  function togglePreparedSpell(id) {
+    update(s => {
+      const sp = s.preparedSpells.find(x => x.id === id);
+      if (sp) sp.open = !sp.open;
+    });
+  }
+
+  function renamePreparedSpell(id) {
+    const sp = state.preparedSpells.find(x => x.id === id);
+    if (!sp) return;
+    const val = prompt('Rename spell:', sp.name);
+    if (val?.trim()) update(s => s.preparedSpells.find(x => x.id === id).name = val.trim());
+  }
+
+  function editPreparedSpellNotes(id) {
+    const sp = state.preparedSpells.find(x => x.id === id);
+    if (!sp) return;
+    const val = prompt('Notes:', sp.notes);
+    if (val !== null) update(s => s.preparedSpells.find(x => x.id === id).notes = val);
+  }
+
+  function removePreparedSpell(id) {
+    update(s => s.preparedSpells = s.preparedSpells.filter(x => x.id !== id));
+  }
+
+  function togglePreparedSpellsOpen() {
+    update(s => s.preparedSpellsOpen = !s.preparedSpellsOpen);
+  }
+
+  function renderPreparedSpells() {
+    const { preparedSpells, preparedSpellsOpen } = state;
+    const ordinals = ['Cantrip','1st','2nd','3rd','4th','5th','6th','7th','8th','9th'];
+
+    const byLevel = {};
+    preparedSpells.forEach(sp => {
+      if (!byLevel[sp.level]) byLevel[sp.level] = [];
+      byLevel[sp.level].push(sp);
+    });
+    const levels = Object.keys(byLevel).map(Number).sort((a, b) => a - b);
+
+    return `
+      <div>
+        <div class="prep-spells-header">
+          <span>Prepared Spells</span>
+          <span style="display:flex;gap:4px;align-items:center;">
+            ${preparedSpellsOpen ? `<button class="btn-sm" onclick="addPreparedSpell()">+</button>` : ''}
+            <button class="btn-sm" onclick="togglePreparedSpellsOpen()" style="padding:0 5px;">${preparedSpellsOpen ? '▲' : '▼'}</button>
+          </span>
+        </div>
+        ${preparedSpellsOpen ? `
+          ${preparedSpells.length === 0
+            ? `<div style="font-size:0.75rem;color:#2a4a5a;margin-bottom:6px;">No spells prepared</div>`
+            : levels.map(lvl => `
+              <div class="prep-level-group">
+                <div class="prep-level-label">${ordinals[lvl]}</div>
+                ${byLevel[lvl].map(sp => `
+                  <div class="prep-spell-row">
+                    <span class="prep-spell-name"
+                      onclick="togglePreparedSpell('${sp.id}')"
+                      ondblclick="renamePreparedSpell('${sp.id}')"
+                      title="Click to expand · Double-click to rename">${sp.name}</span>
+                    <button class="btn-remove-attack" onclick="removePreparedSpell('${sp.id}')">✕</button>
+                  </div>
+                  ${sp.open ? `
+                    <div class="prep-spell-expanded">
+                      <div class="prep-spell-notes ${sp.notes ? '' : 'empty'}"
+                        ondblclick="editPreparedSpellNotes('${sp.id}')"
+                        title="Double-click to edit notes">${sp.notes || 'Double-click to add notes…'}</div>
+                    </div>
+                  ` : ''}
+                `).join('')}
+              </div>
+            `).join('')
+          }
+        ` : ''}
+      </div>
+    `;
+  }
+
+  function toggleSlot(level, pipIndex) {
+    update(s => {
+      const cur = s.slots[level];
+      s.slots[level] = pipIndex < cur ? pipIndex : pipIndex + 1;
+    });
+  }
+
+  function shortRest() {
+    if (state.hitDice.current === 0) {
+      alert('No hit dice remaining.');
+      return;
+    }
+    srDiceToSpend = 1;
+    srRolls = [];
+    srPhase = 'pick';
+    renderSRModal();
+    document.getElementById('short-rest-overlay').classList.remove('hidden');
+  }
+
+  function closeShortRest() {
+    document.getElementById('short-rest-overlay').classList.add('hidden');
+  }
+
+  function srCloseOnBackdrop(event) {
+    if (event.target === document.getElementById('short-rest-overlay')) closeShortRest();
+  }
+
+  function srAdjust(delta) {
+    const max = state.hitDice.current;
+    srDiceToSpend = Math.max(1, Math.min(max, srDiceToSpend + delta));
+    renderSRModal();
+  }
+
+  function srRoll() {
+    const die = parseInt(state.hitDice.dieType.replace('d', ''));
+    const conMod = Math.floor((state.stats.con - 10) / 2);
+    srRolls = Array.from({ length: srDiceToSpend }, () => {
+      const roll = Math.floor(Math.random() * die) + 1;
+      return { roll, conMod, total: roll + conMod };
+    });
+    srPhase = 'rolled';
+    renderSRModal();
+  }
+
+  function srHeal() {
+    const healAmount = srRolls.reduce((sum, r) => sum + r.total, 0);
+    update(s => {
+      s.hp.current = Math.min(s.hp.max + (s.hp.temp || 0), s.hp.current + healAmount);
+      s.hitDice.current = Math.max(0, s.hitDice.current - srDiceToSpend);
+    });
+    closeShortRest();
+  }
+
+  function renderSRModal() {
+    const { dieType, current } = state.hitDice;
+    const body = document.getElementById('sr-body');
+    if (srPhase === 'pick') {
+      body.innerHTML = `
+        <div class="sr-dice-count">${current} ${dieType} available</div>
+        <div class="sr-picker">
+          <button class="btn-sm" onclick="srAdjust(-1)">−</button>
+          <span class="sr-picker-val">${srDiceToSpend}</span>
+          <button class="btn-sm" onclick="srAdjust(1)">+</button>
+          <span style="font-size:0.8rem;color:#6a9aaa;">dice to spend</span>
+        </div>
+        <div class="sr-actions">
+          <button class="btn-sm" onclick="srRoll()">Roll</button>
+          <button class="btn-sm" onclick="closeShortRest()">Cancel</button>
+        </div>
+      `;
+    } else {
+      const healTotal = srRolls.reduce((sum, r) => sum + r.total, 0);
+      const sign = srRolls[0].conMod >= 0 ? '+' : '';
+      body.innerHTML = `
+        <div class="sr-roll-list">
+          ${srRolls.map(r =>
+            `<div class="sr-roll-row">
+              <span>♥ ${dieType} → ${r.roll} ${sign}${r.conMod} CON</span>
+              <span style="color:#a8d8e8;font-weight:600;">${r.total}</span>
+            </div>`
+          ).join('')}
+        </div>
+        <div class="sr-total">Heal for ${healTotal} HP</div>
+        <div class="sr-actions">
+          <button class="btn-sm" onclick="srHeal()">Heal</button>
+          <button class="btn-sm" onclick="closeShortRest()">Cancel</button>
+        </div>
+      `;
+    }
+  }
+
+  function longRest() {
+    if (confirm('Long rest? This restores all spell slots and HP.')) {
+      update(s => {
+        s.slots = [...SLOT_MAX];
+        s.hp.current = s.hp.max;
+      });
+    }
+  }
+
+  function exportCharacter() {
+    const filename = (state.characterName || 'character').replace(/[^a-z0-9_\-]/gi, '_') + '.json';
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function importCharacter() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = evt => {
+        try {
+          const parsed = JSON.parse(evt.target.result);
+          const required = ['hp', 'slots', 'stats', 'characterName'];
+          for (const key of required) {
+            if (!(key in parsed)) throw new Error('Missing key: ' + key);
+          }
+          update(s => Object.assign(s, parsed));
+        } catch (err) { alert('Import failed: ' + err.message); }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  }
+
+  // === STAT BLOCKS ===
+  const statBlocks = new Map(); // id → { name, type, url }
+  let sbNextId = 0;
+  let activeStatId = null;
+
+  function handleFileDrop(e) {
+    e.preventDefault();
+    document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+    Array.from(e.dataTransfer.files).forEach(file => {
+      if (!file.type.startsWith('image/') && file.type !== 'application/pdf') return;
+      const url = URL.createObjectURL(file);
+      const id = String(sbNextId++);
+      const name = file.name.replace(/\.[^.]+$/, '');
+      statBlocks.set(id, { name, type: file.type, url });
+      activeStatId = id;
+      renderStatPanel();
+    });
+  }
+
+  let imgZoom = 1.0;
+
+  function adjustZoom(delta) {
+    imgZoom = Math.max(0.25, Math.min(4.0, imgZoom + delta));
+    applyZoom();
+  }
+  function resetZoom() {
+    imgZoom = 1.0;
+    applyZoom();
+  }
+  function applyZoom() {
+    const img = document.querySelector('#stat-preview img');
+    if (img) img.style.width = (imgZoom * 100) + '%';
+    const lbl = document.getElementById('zoom-display');
+    if (lbl) lbl.textContent = Math.round(imgZoom * 100) + '%';
+  }
+
+  function selectStatBlock(id) {
+    activeStatId = id;
+    imgZoom = 1.0;
+    renderStatPanel();
+    renderHeader();
+  }
+
+  function activateStatBlock(id) {
+    if (!statPanelOpen) {
+      statPanelOpen = true;
+      const panel = document.getElementById('stat-panel');
+      panel.classList.add('open');
+      panel.style.left = ''; panel.style.top = '';
+      panel.style.right = '20px';
+    }
+    selectStatBlock(id);
+  }
+
+  function removeStatBlock(id) {
+    const sb = statBlocks.get(id);
+    if (sb) URL.revokeObjectURL(sb.url);
+    statBlocks.delete(id);
+    if (activeStatId === id) activeStatId = statBlocks.size > 0 ? statBlocks.keys().next().value : null;
+    renderStatPanel();
+    renderHeader();
+  }
+
+  function renderStatPanel() {
+    // Preview
+    const preview = document.getElementById('stat-preview');
+    const active = activeStatId ? statBlocks.get(activeStatId) : null;
+    const zoomBar = document.getElementById('stat-zoom-controls');
+    if (active) {
+      if (active.type.startsWith('image/')) {
+        preview.innerHTML = `<img src="${active.url}" alt="${active.name}" style="width:${imgZoom*100}%">`;
+        zoomBar.classList.add('visible');
+      } else {
+        preview.innerHTML = `<embed src="${active.url}" type="application/pdf">`;
+        zoomBar.classList.remove('visible');
+      }
+      document.getElementById('zoom-display').textContent = Math.round(imgZoom * 100) + '%';
+    } else {
+      preview.innerHTML = `<div class="stat-preview-hint">Drop a stat block image or PDF anywhere</div>`;
+      zoomBar.classList.remove('visible');
+    }
+
+    // Thumbnails
+    const thumbs = document.getElementById('stat-thumbs');
+    const cards = Array.from(statBlocks.entries()).map(([id, sb]) => {
+      const thumb = sb.type.startsWith('image/')
+        ? `<img src="${sb.url}" alt="${sb.name}">`
+        : `<span class="pdf-icon-thumb">📄</span>`;
+      const activeCls = id === activeStatId ? ' active' : '';
+      return `
+        <div class="stat-card${activeCls}" onclick="selectStatBlock('${id}')">
+          <div class="stat-card-thumb">
+            ${thumb}
+            <div class="stat-card-remove" onclick="event.stopPropagation(); removeStatBlock('${id}')">✕</div>
+          </div>
+          <div class="stat-card-name">${sb.name}</div>
+        </div>`;
+    }).join('');
+
+    thumbs.innerHTML = `
+      <button class="btn-sm" onclick="pickStatFile()" style="width:100%;margin-bottom:8px;">+ Add</button>
+      ${cards}
+      <div class="drop-hint-strip">Drop files here</div>`;
+  }
+
+  function pickStatFile() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*,.pdf';
+    input.multiple = true;
+    input.onchange = e => {
+      Array.from(e.target.files).forEach(file => {
+        const url = URL.createObjectURL(file);
+        const id = String(sbNextId++);
+        const name = file.name.replace(/\.[^.]+$/, '');
+        statBlocks.set(id, { name, type: file.type, url });
+        activeStatId = id;
+      });
+      if (!statPanelOpen) {
+        statPanelOpen = true;
+        const panel = document.getElementById('stat-panel');
+        panel.classList.add('open');
+        panel.style.left = ''; panel.style.top = '';
+        panel.style.right = '20px';
+        statMinimized = false;
+        panel.classList.remove('minimized');
+      }
+      renderStatPanel();
+      renderHeader();
+    };
+    input.click();
+  }
+
+  // === STAT PANEL ===
+  let statPanelOpen = false;
+  let draggingPanel = false;
+  let dragOffsetX = 0, dragOffsetY = 0;
+  let draggingLore = false;
+  let loreDragOffsetX = 0, loreDragOffsetY = 0;
+  let loreResizeState = null;
+  let loreMinimized = false;
+  let lorePageMenuOpen = false;
+
+  function toggleLorePanel() {
+    const panel = document.getElementById('lore-panel');
+    if (!panel) return;
+    const isOpen = panel.classList.contains('open');
+    panel.classList.toggle('open', !isOpen);
+    if (!isOpen) {
+      loreMinimized = false;
+      panel.classList.remove('minimized');
+      document.getElementById('lore-minimize-btn').textContent = '—';
+      renderLorePanel();
+    }
+  }
+
+  function toggleLoreMinimize() {
+    loreMinimized = !loreMinimized;
+    document.getElementById('lore-panel').classList.toggle('minimized', loreMinimized);
+    document.getElementById('lore-minimize-btn').textContent = loreMinimized ? '□' : '—';
+  }
+
+  function toggleLorePageMenu(e) {
+    e.stopPropagation();
+    lorePageMenuOpen = !lorePageMenuOpen;
+    document.getElementById('lore-page-menu').classList.toggle('hidden', !lorePageMenuOpen);
+  }
+
+  function toggleStatPanel() {
+    statPanelOpen = !statPanelOpen;
+    const panel = document.getElementById('stat-panel');
+    panel.classList.toggle('open', statPanelOpen);
+    if (statPanelOpen) {
+      panel.style.left = ''; panel.style.top = '';
+      panel.style.right = '20px';
+      statMinimized = false;
+      panel.classList.remove('minimized');
+    }
+    renderHeader();
+  }
+
+  function closeStatPanel() {
+    statPanelOpen = false;
+    document.getElementById('stat-panel').classList.remove('open');
+    renderHeader();
+  }
+
+  let statMinimized = false;
+  let panelResizeState = null;
+
+  function panelZoom() {
+    return parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+  }
+
+  function startPanelResize(e, edge) {
+    e.preventDefault();
+    e.stopPropagation();
+    const z = panelZoom();
+    const panel = document.getElementById('stat-panel');
+    const rect = panel.getBoundingClientRect();
+    panel.style.right = 'auto';
+    panel.style.left = rect.left + 'px';
+    panel.style.top  = rect.top  + 'px';
+    const cursors = { n:'ns-resize', s:'ns-resize', e:'ew-resize', w:'ew-resize', nw:'nwse-resize', se:'nwse-resize', ne:'nesw-resize', sw:'nesw-resize' };
+    panelResizeState = {
+      edge,
+      startX: e.clientX / z, startY: e.clientY / z,
+      startW: rect.width, startH: rect.height,
+      startLeft: rect.left, startTop: rect.top,
+    };
+    const shield = document.getElementById('drag-shield');
+    shield.style.cursor = cursors[edge] || 'default';
+    shield.classList.add('active');
+    document.body.style.userSelect = 'none';
+  }
+
+  function startLoreResize(e, edge) {
+    e.preventDefault();
+    e.stopPropagation();
+    const z = panelZoom();
+    const panel = document.getElementById('lore-panel');
+    const rect = panel.getBoundingClientRect();
+    panel.style.left = rect.left + 'px';
+    panel.style.top  = rect.top  + 'px';
+    const cursors = { n:'ns-resize', s:'ns-resize', e:'ew-resize', w:'ew-resize', nw:'nwse-resize', se:'nwse-resize', ne:'nesw-resize', sw:'nesw-resize' };
+    loreResizeState = {
+      edge,
+      startX: e.clientX / z, startY: e.clientY / z,
+      startW: rect.width, startH: rect.height,
+      startLeft: rect.left, startTop: rect.top,
+    };
+    const shield = document.getElementById('drag-shield');
+    shield.style.cursor = cursors[edge] || 'default';
+    shield.classList.add('active');
+    document.body.style.userSelect = 'none';
+  }
+
+  function toggleStatMinimize() {
+    statMinimized = !statMinimized;
+    document.getElementById('stat-panel').classList.toggle('minimized', statMinimized);
+    document.getElementById('stat-minimize-btn').textContent = statMinimized ? '□' : '—';
+  }
+
+  document.getElementById('stat-titlebar').addEventListener('mousedown', e => {
+    if (e.target.tagName === 'BUTTON') return;
+    draggingPanel = true;
+    const z = panelZoom();
+    const panel = document.getElementById('stat-panel');
+    const rect = panel.getBoundingClientRect();
+    panel.style.right = 'auto';
+    panel.style.left = rect.left + 'px';
+    panel.style.top  = rect.top  + 'px';
+    dragOffsetX = e.clientX / z - rect.left;
+    dragOffsetY = e.clientY / z - rect.top;
+    const shield = document.getElementById('drag-shield');
+    shield.style.cursor = 'grabbing';
+    shield.classList.add('active');
+    document.body.style.cursor = 'grabbing';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+  document.getElementById('lore-titlebar').addEventListener('mousedown', e => {
+    if (e.target.tagName === 'BUTTON') return;
+    draggingLore = true;
+    const z = panelZoom();
+    const panel = document.getElementById('lore-panel');
+    const rect = panel.getBoundingClientRect();
+    panel.style.left = rect.left + 'px';
+    panel.style.top  = rect.top  + 'px';
+    loreDragOffsetX = e.clientX / z - rect.left;
+    loreDragOffsetY = e.clientY / z - rect.top;
+    const shield = document.getElementById('drag-shield');
+    shield.style.cursor = 'grabbing';
+    shield.classList.add('active');
+    document.body.style.cursor = 'grabbing';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+
+  // === DICE ROLLER ===
+  function rollDice(sides) {
+    const countEl = document.getElementById('dice-count');
+    const modEl = document.getElementById('dice-modifier');
+    diceCount = countEl ? Math.max(1, Math.min(4, parseInt(countEl.value) || 1)) : diceCount;
+    diceModifier = modEl ? (parseInt(modEl.value) || 0) : diceModifier;
+    const rolls = Array.from({ length: diceCount }, () => Math.floor(Math.random() * sides) + 1);
+    const total = rolls.reduce((a, b) => a + b, 0) + diceModifier;
+    const detail = diceCount > 1
+      ? `[${rolls.join(' + ')}]${diceModifier !== 0 ? (diceModifier > 0 ? ' + ' : ' − ') + Math.abs(diceModifier) : ''}`
+      : (diceModifier !== 0 ? (diceModifier > 0 ? `+${diceModifier}` : `${diceModifier}`) : '');
+    const expr = `${diceCount}d${sides}${diceModifier > 0 ? '+' + diceModifier : diceModifier < 0 ? diceModifier : ''}`;
+    diceHistory.unshift({ expr, total, detail });
+    if (diceHistory.length > 5) diceHistory.pop();
+    renderDicePanel();
+  }
+
+  function renderDicePanel() {
+    const panel = document.getElementById('dice-panel');
+    if (!panel) return;
+    const dies = [4, 6, 8, 10, 12, 20, 100];
+    const latest = diceHistory[0];
+    const history = diceHistory.slice(1);
+    panel.innerHTML = `
+      <div class="dice-btn-row">
+        ${dies.map(d => `<button class="btn-die" onclick="rollDice(${d})">d${d}</button>`).join('')}
+      </div>
+      <div class="dice-controls-row">
+        <label>Count</label>
+        <input id="dice-count" type="number" min="1" max="4" value="${diceCount}">
+        <label>Mod</label>
+        <input id="dice-modifier" type="number" value="${diceModifier}">
+      </div>
+      ${latest ? `
+        <div class="dice-result">
+          <div class="dice-result-label">Result</div>
+          <div class="dice-result-value">${latest.total}</div>
+          ${latest.detail ? `<div class="dice-result-detail">${latest.detail}</div>` : ''}
+        </div>` : ''}
+      ${history.length > 0 ? `
+        <div class="dice-history">
+          ${history.map(h => `
+            <div class="dice-history-item">
+              <span class="dice-hist-expr">${h.expr}</span>
+              <span class="dice-hist-val">${h.total}</span>
+            </div>`).join('')}
+        </div>` : ''}
+    `;
+  }
+
+  function toggleDicePanel() {
+    diceMenuOpen = !diceMenuOpen;
+    const panel = document.getElementById('dice-panel');
+    if (panel) panel.classList.toggle('open', diceMenuOpen);
+    if (diceMenuOpen) renderDicePanel();
+  }
+
+  // === HEADER ===
+  let restMenuOpen = false;
+  let materialsMenuOpen = false;
+  let conditionsMenuOpen = false;
+
+  const CONDITIONS = [
+    { name: 'Blinded',        effect: "Can't see; auto-fails sight-based checks. Attackers have advantage; creature has disadvantage on attacks." },
+    { name: 'Charmed',        effect: "Can't attack the charmer or target them with harmful effects. Charmer has advantage on social checks with the creature." },
+    { name: 'Deafened',       effect: "Can't hear; auto-fails hearing-based checks." },
+    { name: 'Exhaustion',     effect: "Level 1: Disadvantage on ability checks. Level 2: Speed halved. Level 3: Disadvantage on attacks and saves. Level 4: HP max halved. Level 5: Speed = 0. Level 6: Death. Each long rest removes one level." },
+    { name: 'Frightened',     effect: "Disadvantage on ability checks and attack rolls while the source is in sight. Can't willingly move closer to the source." },
+    { name: 'Grappled',       effect: "Speed becomes 0. Ends if the grappler is incapacitated or the creature is removed from reach." },
+    { name: 'Incapacitated',  effect: "Can't take actions or reactions." },
+    { name: 'Invisible',      effect: "Can't be seen without magic or special senses. Creature's attacks have advantage; attacks against it have disadvantage." },
+    { name: 'Paralyzed',      effect: "Incapacitated; can't move or speak. Auto-fails STR and DEX saves. Attackers have advantage. Hits from within 5 ft are critical hits." },
+    { name: 'Petrified',      effect: "Transformed to inanimate substance. Incapacitated; unaware of surroundings. Auto-fails STR and DEX saves. Attackers have advantage. Resistance to all damage. Immune to poison and disease (existing ones suspended)." },
+    { name: 'Poisoned',       effect: "Disadvantage on attack rolls and ability checks." },
+    { name: 'Prone',          effect: "Can only crawl unless it stands up (costs half speed). Disadvantage on attacks. Attackers within 5 ft have advantage; others have disadvantage." },
+    { name: 'Restrained',     effect: "Speed becomes 0. Attackers have advantage. Creature has disadvantage on attacks and DEX saves." },
+    { name: 'Stunned',        effect: "Incapacitated; can't move; speaks only falteringly. Auto-fails STR and DEX saves. Attackers have advantage." },
+    { name: 'Unconscious',    effect: "Incapacitated; unaware; drops held items; falls prone. Auto-fails STR and DEX saves. Attackers have advantage. Hits from within 5 ft are critical hits." },
+  ];
+
+  function toggleFormulaPanel() {
+    const panel = document.getElementById('formula-panel');
+    panel.classList.toggle('open');
+  }
+  document.addEventListener('click', e => {
+    const wrap = document.querySelector('.formula-dropdown-wrap');
+    if (wrap && !wrap.contains(e.target)) {
+      document.getElementById('formula-panel')?.classList.remove('open');
+    }
+  });
+  document.addEventListener('click', e => {
+    if (diceMenuOpen && !e.composedPath().some(el => el.classList?.contains('dice-dropdown-wrap'))) {
+      diceMenuOpen = false;
+      document.getElementById('dice-panel')?.classList.remove('open');
+    }
+  });
+
+  function editCharacterName() {
+    const val = prompt('Character name:', state.characterName);
+    if (val !== null && val.trim() !== '') update(s => s.characterName = val.trim());
+  }
+  function renderHeader() {
+    document.getElementById('app-header').innerHTML = `
+      <h1 onclick="editCharacterName()" title="Click to rename" style="cursor:pointer">${state.characterName}</h1>
+      <span onclick="editStat('levelLabel')" title="Click to edit level &amp; class" style="cursor:pointer;font-size:0.8rem;color:#5a8a9a;margin-left:2px;margin-right:8px;white-space:nowrap;">${state.stats.levelLabel}</span>
+      <div class="rest-dropdown-wrap">
+        <button class="rest-menu-btn" onclick="toggleRestMenu()">⚡ Rests ▾</button>
+        <div id="rest-menu" class="rest-menu${restMenuOpen ? '' : ' hidden'}">
+          <button onclick="shortRest()">Short Rest</button>
+          <button onclick="longRest()">Long Rest</button>
+          <hr style="border:none;border-top:1px solid #0f2535;margin:2px 0;">
+          <button onclick="exportCharacter()">Export…</button>
+          <button onclick="importCharacter()">Import…</button>
+        </div>
+      </div>
+      <div class="materials-dropdown-wrap">
+        <button class="formula-dropdown-btn${statPanelOpen ? ' stat-tab-btn active' : ''}" onclick="toggleMaterialsMenu(event)">Materials ▾</button>
+        <div id="materials-menu" class="materials-menu${materialsMenuOpen ? '' : ' hidden'}">
+          ${Array.from(statBlocks.entries()).map(([id, sb]) => {
+            const isActive = id === activeStatId;
+            const icon = sb.type.startsWith('image/') ? '🖼' : '📄';
+            return `<button class="${isActive ? 'mat-active' : ''}" onclick="selectMaterial('${id}')" title="${sb.name}">${icon} ${sb.name}</button>`;
+          }).join('')}
+          ${statBlocks.size > 0 ? '<hr class="mat-divider">' : ''}
+          <button onclick="openMaterialFile()">+ Add file…</button>
+        </div>
+      </div>
+      <div class="conditions-dropdown-wrap">
+        <button class="formula-dropdown-btn" onclick="toggleConditionsPanel(); event.stopPropagation();">Conditions ▾</button>
+        <div class="conditions-panel${conditionsMenuOpen ? '' : ' hidden'}" id="conditions-panel">
+          ${CONDITIONS.map(c => `
+            <div class="condition-entry">
+              <div class="condition-name">${c.name}</div>
+              <div class="condition-effect">${c.effect}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div class="formula-dropdown-wrap">
+        <button class="formula-dropdown-btn" onclick="toggleFormulaPanel(); event.stopPropagation();">Formulas ▾</button>
+        <div class="formula-panel" id="formula-panel">
+          <div class="formula-row"><span class="formula-lhs">Attack Roll</span><span>= d20 + Ability Mod + Proficiency</span></div>
+          <div class="formula-row"><span class="formula-lhs">Spell Attack</span><span>= d20 + Spell Mod + Proficiency</span></div>
+          <div class="formula-row"><span class="formula-lhs">Spell Save DC</span><span>= 8 + Spell Mod + Proficiency</span></div>
+        </div>
+      </div>
+      <div class="dice-dropdown-wrap">
+        <button class="dice-dropdown-btn"
+          onclick="toggleDicePanel(); event.stopPropagation();">🎲 Roll ▾</button>
+        <div class="dice-panel" id="dice-panel"></div>
+      </div>
+      <button class="formula-dropdown-btn" onclick="toggleLorePanel()" style="margin-left:4px;">📖 Lore</button>
+      <button class="btn-help" onclick="openHelp()" title="Quick Start Guide" style="margin-left:8px;">?</button>
+    `;
+  }
+  function toggleRestMenu() {
+    restMenuOpen = !restMenuOpen;
+    const menu = document.getElementById('rest-menu');
+    if (menu) menu.classList.toggle('hidden', !restMenuOpen);
+  }
+  // Close rest menu when clicking outside
+  document.addEventListener('click', e => {
+    if (restMenuOpen && !e.target.closest('.rest-dropdown-wrap')) {
+      restMenuOpen = false;
+      const menu = document.getElementById('rest-menu');
+      if (menu) menu.classList.add('hidden');
+    }
+  });
+  // Close lore page menu when clicking outside
+  document.addEventListener('click', e => {
+    if (lorePageMenuOpen && !e.target.closest('#lore-page-dropdown-wrap')) {
+      lorePageMenuOpen = false;
+      document.getElementById('lore-page-menu')?.classList.add('hidden');
+    }
+  });
+  function toggleMaterialsMenu(e) {
+    e.stopPropagation();
+    materialsMenuOpen = !materialsMenuOpen;
+    const menu = document.getElementById('materials-menu');
+    if (menu) menu.classList.toggle('hidden', !materialsMenuOpen);
+    if (materialsMenuOpen && !statPanelOpen) {
+      statPanelOpen = true;
+      const panel = document.getElementById('stat-panel');
+      panel.classList.add('open');
+      panel.style.left = ''; panel.style.top = '';
+      panel.style.right = '20px';
+      statMinimized = false;
+      panel.classList.remove('minimized');
+      renderHeader();
+    }
+  }
+  function selectMaterial(id) {
+    materialsMenuOpen = false;
+    document.getElementById('materials-menu')?.classList.add('hidden');
+    activateStatBlock(id);
+  }
+  function openMaterialFile() {
+    materialsMenuOpen = false;
+    document.getElementById('materials-menu')?.classList.add('hidden');
+    pickStatFile();
+  }
+  // Close materials menu when clicking outside
+  document.addEventListener('click', e => {
+    if (materialsMenuOpen && !e.target.closest('.materials-dropdown-wrap')) {
+      materialsMenuOpen = false;
+      const menu = document.getElementById('materials-menu');
+      if (menu) menu.classList.add('hidden');
+    }
+  });
+  function toggleConditionsPanel() {
+    conditionsMenuOpen = !conditionsMenuOpen;
+    const panel = document.getElementById('conditions-panel');
+    if (panel) panel.classList.toggle('hidden', !conditionsMenuOpen);
+  }
+  document.addEventListener('click', e => {
+    if (conditionsMenuOpen && !e.target.closest('.conditions-dropdown-wrap')) {
+      conditionsMenuOpen = false;
+      document.getElementById('conditions-panel')?.classList.add('hidden');
+    }
+  });
+
+  // === ATTUNED ITEMS ===
+  function increaseAttunementMax() {
+    update(s => s.attunementMax++);
+  }
+  function decreaseAttunementMax() {
+    const attuned = state.items.filter(i => i.attuned).length;
+    update(s => s.attunementMax = Math.max(attuned, s.attunementMax - 1));
+  }
+
+  // === MAGIC ITEMS ===
+  function addMagicItem() {
+    const name = prompt('Magic item name:');
+    if (!name) return;
+    update(s => s.items.push({
+      id: String(Date.now()),
+      name: name.trim(),
+      qty: '1',
+      description: '',
+      type: 'magic',
+      equipped: false,
+      attuned: false,
+      chargeMax: 0,
+      chargeCurrent: 0
+    }));
+  }
+  function editMagicItemName(id) {
+    const item = state.items.find(i => i.id === id);
+    if (!item) return;
+    const name = prompt('Magic item name:', item.name);
+    if (name !== null && name.trim()) update(s => { const i = s.items.find(i => i.id === id); if (i) i.name = name.trim(); });
+  }
+  function clickChargePip(id, idx) {
+    update(s => {
+      const item = s.items.find(i => i.id === id);
+      if (!item) return;
+      // Click filled pip = spend down to that index; click empty = restore up to idx+1
+      item.chargeCurrent = item.chargeCurrent > idx ? idx : idx + 1;
+    });
+  }
+  function setItemChargeMax(id, val) {
+    const max = Math.max(0, parseInt(val) || 0);
+    update(s => {
+      const item = s.items.find(i => i.id === id);
+      if (!item) return;
+      const wasOff = item.chargeMax === 0;
+      item.chargeMax = max;
+      if (wasOff && max > 0) {
+        item.chargeCurrent = max; // Start full when first enabled
+      } else {
+        item.chargeCurrent = Math.min(item.chargeCurrent, max);
+      }
+    });
+  }
+  function toggleEquipped(id) {
+    update(s => { const i = s.items.find(i => i.id === id); if (i) i.equipped = !i.equipped; });
+  }
+  function toggleAttuned(id) {
+    update(s => { const i = s.items.find(i => i.id === id); if (i) i.attuned = !i.attuned; });
+  }
+
+  // === INVENTORY / ITEM DESC / QTY / CURRENCY ===
+  function toggleItemDesc(id) {
+    itemDescOpen[id] = !itemDescOpen[id];
+    render();
+  }
+  function startEditDesc(id) {
+    itemDescEdit = id;
+    render();
+  }
+  function cancelEditDesc() {
+    itemDescEdit = null;
+    render();
+  }
+  function saveItemDesc(id) {
+    const val = document.getElementById('edit-desc-' + id)?.value ?? '';
+    update(s => {
+      const item = s.items.find(i => i.id === id);
+      if (item) item.description = val;
+    });
+    itemDescEdit = null;
+  }
+  function adjustItemQty(id, delta) {
+    update(s => {
+      const item = s.items.find(i => i.id === id);
+      if (!item) return;
+      const cur = parseInt(item.qty) || 1;
+      item.qty = String(Math.max(1, cur + delta));
+    });
+  }
+  function setCurrency(field, val) {
+    const n = parseInt(val);
+    if (!isNaN(n)) { state.currency[field] = Math.max(0, n); saveState(); }
+  }
+  function toggleInventory() {
+    update(s => s.inventoryOpen = !s.inventoryOpen);
+  }
+  function openHelp() {
+    helpOpen = true;
+    document.getElementById('help-overlay').classList.remove('hidden');
+  }
+  function closeHelp() {
+    helpOpen = false;
+    document.getElementById('help-overlay').classList.add('hidden');
+  }
+  function closeHelpOnBackdrop(event) {
+    if (event.target === document.getElementById('help-overlay')) closeHelp();
+  }
+  function addInventoryItem() {
+    const name = prompt('Item name:');
+    if (!name) return;
+    update(s => s.items.push({
+      id: String(Date.now()),
+      name: name.trim(),
+      qty: '1',
+      description: '',
+      type: 'normal',
+      equipped: false,
+      attuned: false
+    }));
+  }
+  function removeItem(id) {
+    update(s => s.items = s.items.filter(i => i.id !== id));
+  }
+  function editInventoryItem(id) {
+    const item = state.items.find(i => i.id === id);
+    if (!item) return;
+    const name = prompt('Item name:', item.name);
+    if (name === null) return;
+    const qty = prompt('Quantity:', item.qty);
+    update(s => {
+      const i = s.items.find(i => i.id === id);
+      if (!i) return;
+      i.name = name.trim();
+      i.qty = (qty ?? item.qty).trim();
+    });
+  }
+  // === FEATS ===
+  let featDescOpen = {};
+  let featDescEdit = null;
+
+  function addFeat() {
+    const name = prompt('Feat name:');
+    if (!name) return;
+    update(s => s.feats.push({ id: String(Date.now()), name: name.trim(), description: '' }));
+  }
+  function removeFeat(id) {
+    featDescOpen[id] = false;
+    if (featDescEdit === id) featDescEdit = null;
+    update(s => s.feats = s.feats.filter(f => f.id !== id));
+  }
+  function editFeatName(id) {
+    const feat = state.feats.find(f => f.id === id);
+    if (!feat) return;
+    const val = prompt('Feat name:', feat.name);
+    if (val !== null && val.trim()) update(s => { const f = s.feats.find(f => f.id === id); if (f) f.name = val.trim(); });
+  }
+  function toggleFeatDesc(id) {
+    featDescOpen[id] = !featDescOpen[id];
+    render();
+  }
+  function startEditFeatDesc(id) {
+    featDescEdit = id;
+    render();
+  }
+  function cancelEditFeatDesc() {
+    featDescEdit = null;
+    render();
+  }
+  function saveFeatDesc(id) {
+    const val = document.getElementById('feat-desc-' + id)?.value ?? '';
+    update(s => { const f = s.feats.find(f => f.id === id); if (f) f.description = val; });
+    featDescEdit = null;
+  }
+  function toggleFeatsSection() {
+    update(s => s.featsOpen = !s.featsOpen);
+  }
+  function renderFeats() {
+    const { feats, featsOpen } = state;
+    return `
+      <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Feats</span>
+        <span style="display:flex;gap:4px;align-items:center;">
+          ${featsOpen ? `<button class="btn-add-inv" style="padding:2px 8px;font-size:0.7rem;" onclick="event.stopPropagation();addFeat()">+ Feat</button>` : ''}
+          <button class="btn-sm" onclick="toggleFeatsSection()" style="padding:0 6px;">${featsOpen ? '▲' : '▼'}</button>
+        </span>
+      </div>
+      ${featsOpen ? `
+        ${feats.length === 0
+          ? '<div style="font-size:0.75rem;color:#2a4a5a;padding:4px 0;">No feats added</div>'
+          : feats.map(f => {
+              const open    = featDescOpen[f.id];
+              const editing = featDescEdit === f.id;
+              return `
+                <div style="padding:4px 0;border-bottom:1px solid #0f2535;">
+                  <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <span style="font-size:0.8rem;color:#8ab8c8;cursor:pointer;"
+                      ondblclick="editFeatName('${f.id}')"
+                      title="Double-click to rename">${f.name}</span>
+                    <span style="display:flex;gap:4px;">
+                      <button class="btn-sm" onclick="toggleFeatDesc('${f.id}')" style="padding:0 5px;">${open ? '▲' : '▼'}</button>
+                      <button class="btn-sm" onclick="removeFeat('${f.id}')" style="padding:0 5px;color:#a05050;">✕</button>
+                    </span>
+                  </div>
+                  ${open ? `
+                    <div style="padding:4px 0 2px 0;">
+                      ${editing ? `
+                        <textarea id="feat-desc-${f.id}"
+                          style="width:100%;min-height:60px;background:#0a1a24;color:#c8dde8;border:1px solid #1a3a4a;border-radius:4px;padding:4px;font-size:0.75rem;font-family:'Inter',sans-serif;resize:vertical;">${f.description}</textarea>
+                        <div style="display:flex;gap:4px;margin-top:4px;">
+                          <button class="edit-save-btn" onclick="saveFeatDesc('${f.id}')">Save</button>
+                          <button class="edit-cancel-btn" onclick="cancelEditFeatDesc()">✕</button>
+                        </div>
+                      ` : `
+                        <div style="font-size:0.75rem;color:#6a9aaa;white-space:pre-wrap;min-height:16px;cursor:text;"
+                          ondblclick="startEditFeatDesc('${f.id}')"
+                          title="Double-click to edit">${f.description || '<em style="color:#2a4a5a;">No description</em>'}</div>
+                      `}
+                    </div>
+                  ` : ''}
+                </div>
+              `;
+            }).join('')
+        }
+      ` : ''}
+    `;
+  }
+
+  // === UNIFIED INVENTORY ===
+  function renderInventory() {
+    const { items, inventoryOpen, attunementMax, currency } = state;
+    const normalItems  = items.filter(i => i.type === 'normal');
+    const magicItems   = items.filter(i => i.type === 'magic');
+    const attunedItems = items.filter(i => i.attuned);
+    const attunedCount = attunedItems.length;
+    const over = attunedCount > attunementMax;
+
+    function itemRow(i, isMagic) {
+      const qty = parseInt(i.qty) || 1;
+      const descOpen = itemDescOpen[i.id];
+      const editing  = itemDescEdit === i.id;
+      const editFn   = isMagic ? `editMagicItemName('${i.id}')` : `editInventoryItem('${i.id}')`;
+      return `
+        <div>
+          <div class="inventory-item">
+            <button class="btn-sm" onclick="adjustItemQty('${i.id}',-1)" style="padding:0 5px;">−</button>
+            <span style="font-size:0.75rem;color:#5a8a9a;min-width:24px;text-align:center;">×${qty}</span>
+            <button class="btn-sm" onclick="adjustItemQty('${i.id}',1)" style="padding:0 5px;">+</button>
+            <span class="${isMagic ? 'magic-item-name' : 'inv-name'}" onclick="toggleItemDesc('${i.id}')" ondblclick="${editFn}" title="Click to expand · Double-click to rename" style="flex:1;margin-left:6px;cursor:pointer;">${i.name}</span>
+            ${isMagic ? `
+              <button class="btn-toggle ${i.equipped ? 'active-equipped' : ''}" onclick="toggleEquipped('${i.id}')">Eqp</button>
+              <button class="btn-toggle ${i.attuned ? 'active-attuned' : ''}" onclick="toggleAttuned('${i.id}')">Att</button>
+            ` : ''}
+            <button class="btn-sm" onclick="toggleItemDesc('${i.id}')" title="Description" style="padding:0 5px;opacity:${(i.description || isMagic) ? 1 : 0.4};">${descOpen ? '▼' : '▶'}</button>
+            <button class="btn-remove-inv" onclick="removeItem('${i.id}')">✕</button>
+          </div>
+          ${isMagic && i.chargeMax > 0 ? `
+            <div style="padding:1px 0 3px 32px;display:flex;align-items:center;gap:3px;">
+              <span style="font-size:0.65rem;color:#c8904a;margin-right:2px;">⚡</span>
+              ${Array.from({length: i.chargeMax}, (_, idx) => `
+                <span onclick="clickChargePip('${i.id}',${idx})" title="${idx < i.chargeCurrent ? 'Click to spend' : 'Click to restore'}"
+                  style="cursor:pointer;display:inline-block;width:9px;height:9px;border-radius:50%;
+                         background:${idx < i.chargeCurrent ? '#c8904a' : 'transparent'};
+                         border:1px solid ${idx < i.chargeCurrent ? '#c8904a' : '#3a5a6a'};"></span>
+              `).join('')}
+              <span style="font-size:0.65rem;color:#6a9aaa;margin-left:3px;">${i.chargeCurrent}/${i.chargeMax}</span>
+            </div>
+          ` : ''}
+          ${descOpen ? `
+            <div style="padding:4px 6px 4px 10px;background:#0a1825;border-left:2px solid #1a3a4a;margin-bottom:4px;">
+              ${isMagic ? `
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                  <span style="font-size:0.65rem;color:#c8904a;">⚡</span>
+                  <span style="font-size:0.72rem;color:#5a8a9a;">Charges:</span>
+                  <input type="number" min="0" max="20" value="${i.chargeMax}"
+                    onchange="setItemChargeMax('${i.id}',this.value)"
+                    style="width:40px;background:#0f2535;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.72rem;text-align:center;"
+                    title="Max charges (0 = disabled)">
+                  <span style="font-size:0.65rem;color:#2a4a5a;">max (0 = off)</span>
+                </div>
+              ` : ''}
+              ${editing ? `
+                <textarea id="edit-desc-${i.id}" style="width:100%;background:#0f2535;border:1px solid #1a3a4a;color:#8ab8c8;padding:4px;border-radius:3px;font-size:0.75rem;resize:vertical;min-height:48px;">${i.description}</textarea>
+                <div style="display:flex;gap:4px;margin-top:4px;">
+                  <button class="btn-sm" onclick="saveItemDesc('${i.id}')">Save</button>
+                  <button class="btn-sm" onclick="cancelEditDesc()">Cancel</button>
+                </div>
+              ` : `
+                <div style="font-size:0.75rem;color:#6a9aaa;white-space:pre-wrap;min-height:16px;cursor:text;"
+                  ondblclick="startEditDesc('${i.id}')"
+                  title="Double-click to edit">${i.description || '<em style="color:#2a4a5a;">No description</em>'}</div>
+              `}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    const slotMax = Math.max(attunementMax, attunedCount);
+    const pips = Array.from({ length: slotMax }, (_, idx) =>
+      `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 2px;background:${idx < attunedCount ? '#7070d8' : 'transparent'};border:1px solid ${idx < attunedCount ? '#7070d8' : '#3a4a6a'};"></span>`
+    ).join('');
+
+    const currencyRow = `
+      <div style="border-top:1px solid #0f2535;margin-top:8px;padding-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+        ${['pp','gp','sp','cp'].map(c => `
+          <span style="display:flex;align-items:center;gap:3px;font-size:0.75rem;color:#8ab8c8;">
+            <span style="color:#5a8a9a;text-transform:uppercase;">${c}</span>
+            <input type="number" min="0" value="${currency[c]}" onchange="setCurrency('${c}',this.value)"
+              style="width:44px;background:#0f2535;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.75rem;text-align:right;">
+          </span>
+        `).join('')}
+      </div>
+    `;
+
+    const subHeader = label =>
+      `<div style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:#2a5a6a;margin:8px 0 4px;border-bottom:1px solid #0f2535;padding-bottom:2px;">${label}</div>`;
+
+    return `
+      <div>
+        <div class="panel-title collapsible-title" onclick="toggleInventory()" style="display:flex;align-items:center;justify-content:space-between;">
+          <span>Inventory</span>
+          <span style="display:flex;align-items:center;gap:6px;">
+            <button class="btn-add-inv" style="padding:2px 8px;font-size:0.7rem;" onclick="event.stopPropagation();addInventoryItem()">+ Item</button>
+            <button class="btn-add-inv" style="padding:2px 8px;font-size:0.7rem;" onclick="event.stopPropagation();addMagicItem()">+ Magic</button>
+            <span>${inventoryOpen ? '▲' : '▼'}</span>
+          </span>
+        </div>
+        ${inventoryOpen ? `
+          ${subHeader('Items')}
+          ${normalItems.length === 0 ? '<div style="font-size:0.75rem;color:#2a4a5a;padding:4px 0;">Empty</div>' : normalItems.map(i => itemRow(i, false)).join('')}
+
+          ${subHeader('Magic Items')}
+          ${magicItems.length === 0 ? '<div style="font-size:0.75rem;color:#2a4a5a;padding:4px 0;">None</div>' : magicItems.map(i => itemRow(i, true)).join('')}
+
+          ${subHeader('Attuned')}
+          <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:4px;">
+            <div style="display:flex;gap:4px;flex-wrap:wrap;">${pips}</div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span class="attuned-counter ${over ? 'over' : ''}">${attunedCount} / ${attunementMax}</span>
+              <button class="btn-sm" onclick="decreaseAttunementMax()" style="padding:0 6px;">−</button>
+              <button class="btn-sm" onclick="increaseAttunementMax()" style="padding:0 6px;">+</button>
+            </div>
+          </div>
+          ${attunedItems.length === 0
+            ? '<div style="font-size:0.75rem;color:#2a4a5a;padding:4px 0;">No attuned items</div>'
+            : attunedItems.map(i => `
+              <div class="attuned-item-row">
+                <div class="attuned-dot"></div>
+                <span>${i.name}</span>
+              </div>
+            `).join('')
+          }
+          ${currencyRow}
+        ` : ''}
+      </div>
+    `;
+  }
+
+  // === CUSTOM ATTACKS ===
+  function addAttack() {
+    const name = prompt('Attack name (e.g. Sharpshooter Shot):');
+    if (!name) return;
+    const hit = prompt('To Hit bonus (e.g. +7):');
+    if (hit === null) return;
+    const dmg = prompt('Damage (e.g. 1d8+10 piercing):') ?? '';
+    const notes = prompt('Notes (e.g. -5/+10, ignore half cover) — leave blank if none:') ?? '';
+    update(s => s.attacks.push({
+      id: String(Date.now()),
+      name: name.trim(),
+      hit: hit.trim(),
+      dmg: dmg.trim(),
+      notes: notes.trim()
+    }));
+  }
+  function removeAttack(id) {
+    update(s => s.attacks = s.attacks.filter(a => a.id !== id));
+  }
+  function editAttack(id) {
+    const atk = state.attacks.find(a => a.id === id);
+    if (!atk) return;
+    const name = prompt('Attack name:', atk.name);
+    if (name === null) return;
+    const hit = prompt('To Hit:', atk.hit);
+    if (hit === null) return;
+    const dmg = prompt('Damage:', atk.dmg);
+    const notes = prompt('Notes:', atk.notes);
+    update(s => {
+      const a = s.attacks.find(a => a.id === id);
+      if (!a) return;
+      a.name = name.trim();
+      a.hit = hit.trim();
+      a.dmg = (dmg ?? atk.dmg).trim();
+      a.notes = (notes ?? atk.notes).trim();
+    });
+  }
+  function renderAttacks() {
+    const { attacks } = state;
+    return `
+      <div id="attacks-section">
+        <div class="panel-title">Attacks</div>
+        ${attacks.length === 0 ? '<div style="font-size:0.75rem;color:#2a4a5a;margin-bottom:8px;">None defined</div>' : ''}
+        ${attacks.map(a => `
+          <div class="attack-entry">
+            <div class="attack-entry-header">
+              <span class="attack-name" onclick="editAttack('${a.id}')" title="Click to edit">${a.name}</span>
+              <button class="btn-remove-attack" onclick="removeAttack('${a.id}')">✕</button>
+            </div>
+            <div class="attack-stats">${a.hit} to hit &nbsp;·&nbsp; ${a.dmg || '—'}</div>
+            ${a.notes ? `<div class="attack-notes">${a.notes}</div>` : ''}
+          </div>
+        `).join('')}
+        <button class="btn-add-attack" onclick="addAttack()">+ Add Attack</button>
+      </div>
+    `;
+  }
+
+  // === SKILLS ===
+  const SKILL_DEFS = [
+    ['Athletics',       'str', 'athletics'],
+    ['Acrobatics',      'dex', 'acrobatics'],
+    ['Sleight of Hand', 'dex', 'sleightOfHand'],
+    ['Stealth',         'dex', 'stealth'],
+    ['Arcana',          'int', 'arcana'],
+    ['History',         'int', 'history'],
+    ['Investigation',   'int', 'investigation'],
+    ['Nature',          'int', 'nature'],
+    ['Religion',        'int', 'religion'],
+    ['Animal Handling', 'wis', 'animalHandling'],
+    ['Insight',         'wis', 'insight'],
+    ['Medicine',        'wis', 'medicine'],
+    ['Perception',      'wis', 'perception'],
+    ['Survival',        'wis', 'survival'],
+    ['Deception',       'cha', 'deception'],
+    ['Intimidation',    'cha', 'intimidation'],
+    ['Performance',     'cha', 'performance'],
+    ['Persuasion',      'cha', 'persuasion'],
+  ];
+  const ABILITY_KEYS = ['str','dex','con','int','wis','cha'];
+
+  function cycleSkillProf(key) {
+    update(s => s.skills[key] = (s.skills[key] + 1) % 3);
+  }
+  function toggleSkillsOpen() {
+    update(s => s.skillsOpen = !s.skillsOpen);
+  }
+  function cycleCustomSkillProf(id) {
+    update(s => { const sk = s.customSkills.find(x => x.id === id); if (sk) sk.prof = (sk.prof + 1) % 3; });
+  }
+  function removeCustomSkill(id) {
+    update(s => s.customSkills = s.customSkills.filter(x => x.id !== id));
+  }
+  function addCustomSkill() {
+    const name = prompt('Skill name:');
+    if (!name?.trim()) return;
+    const ab = prompt('Linked ability (str / dex / con / int / wis / cha):', 'str');
+    if (!ab || !ABILITY_KEYS.includes(ab.trim().toLowerCase())) {
+      alert('Enter one of: str, dex, con, int, wis, cha');
+      return;
+    }
+    update(s => s.customSkills.push({ id: String(Date.now()), name: name.trim(), abilityKey: ab.trim().toLowerCase(), prof: 0 }));
+  }
+
+  function setSkillBonus(key, abilityMod, profBonus, pipState) {
+    const current = state.skillBonuses[key] ?? 0;
+    const calcBase = abilityMod + (pipState === 2 ? profBonus * 2 : pipState === 1 ? profBonus : 0);
+    const val = prompt(`Flat bonus for ${key} (added on top of calculated ${calcBase >= 0 ? '+' : ''}${calcBase}):`, current);
+    if (val === null) return;
+    const n = parseInt(val) || 0;
+    update(s => { s.skillBonuses[key] = n; });
+  }
+  function skillRow(label, abilityKey, pipState, onPipClick, onRemove, bonusKey) {
+    const abilityScore = state.stats[abilityKey] ?? 10;
+    const abilityMod = Math.floor((abilityScore - 10) / 2);
+    const profBonus = pipState === 2 ? state.profBonus * 2 : pipState === 1 ? state.profBonus : 0;
+    const flatBonus = bonusKey ? (state.skillBonuses[bonusKey] ?? 0) : 0;
+    const total = abilityMod + profBonus + flatBonus;
+    const sign = total >= 0 ? '+' : '';
+    const pipCls = pipState === 2 ? 'expertise' : pipState === 1 ? 'prof' : '';
+    const pipTitle = ['Not proficient', 'Proficient', 'Expertise'][pipState];
+    const pipStyle = flatBonus !== 0 ? 'background:#a03030;border-color:#c04040;' : '';
+    const bonusOnClick = bonusKey ? `setSkillBonus('${bonusKey}',${abilityMod},${state.profBonus},${pipState})` : '';
+    return `
+      <div class="save-row" style="padding:3px 0;">
+        <span style="display:flex;align-items:center;gap:5px;">
+          <span class="prof-pip ${pipCls}" onclick="${onPipClick}" title="${pipTitle}" style="${pipStyle}"></span>
+          <span class="save-name" style="font-size:0.7rem;">${label}</span>
+          ${onRemove ? `<span style="font-size:0.58rem;color:#2a5a6a;text-transform:uppercase;">${abilityKey}</span>` : ''}
+        </span>
+        <span style="display:flex;align-items:center;gap:4px;">
+          <span class="stat-value" style="font-size:0.78rem;font-weight:500;${bonusKey ? 'cursor:pointer;' : ''}" ${bonusOnClick ? `onclick="${bonusOnClick}" title="Click to set flat bonus${flatBonus !== 0 ? ' (current: ' + (flatBonus >= 0 ? '+' : '') + flatBonus + ')' : ''}"` : ''}>${sign}${total}${flatBonus !== 0 ? `<span style="font-size:0.65rem;color:#c8904a;margin-left:2px;">${flatBonus >= 0 ? '+' : ''}${flatBonus}</span>` : ''}</span>
+          ${onRemove ? `<button onclick="${onRemove}" style="background:none;border:none;color:#2a4a5a;cursor:pointer;font-size:0.75rem;padding:0 2px;" title="Remove">✕</button>` : ''}
+        </span>
+      </div>
+    `;
+  }
+
+  function renderSkills() {
+    const { skills, customSkills, skillsOpen } = state;
+    const builtInRows = SKILL_DEFS.map(([label, abilityKey, stateKey]) =>
+      skillRow(label, abilityKey, skills[stateKey] ?? 0, `cycleSkillProf('${stateKey}')`, null, stateKey)
+    ).join('');
+    const customRows = customSkills.map(sk =>
+      skillRow(sk.name, sk.abilityKey, sk.prof, `cycleCustomSkillProf('${sk.id}')`, `removeCustomSkill('${sk.id}')`, null)
+    ).join('');
+    return `
+      <div style="margin-top:4px;">
+        <div class="panel-title collapsible-title" onclick="toggleSkillsOpen()">
+          <span>Skills</span>
+          <span>${skillsOpen ? '▲' : '▼'}</span>
+        </div>
+        ${skillsOpen ? `
+          ${builtInRows}
+          ${customRows}
+          <button class="btn-add-inv" onclick="addCustomSkill()" style="margin-top:8px;">+ Add Custom Skill</button>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  // === ACTIVE SPELLS ===
+  function toggleHpEffect(key) {
+    update(s => {
+      const fx = s.hpEffects[key];
+      const val = Math.max(0, fx.value);
+      if (fx.active) {
+        // Turning OFF
+        if (key === 'maxHpReduction') {
+          s.hp.max = Math.max(1, s.hp.max + val);
+        } else {
+          s.hp.max = Math.max(1, s.hp.max - val);
+          s.hp.current = Math.min(s.hp.current, s.hp.max);
+        }
+        fx.active = false;
+      } else {
+        // Turning ON
+        if (key === 'maxHpReduction') {
+          s.hp.max = Math.max(1, s.hp.max - val);
+          s.hp.current = Math.min(s.hp.current, s.hp.max);
+        } else {
+          s.hp.max += val;
+          s.hp.current += val;
+        }
+        fx.active = true;
+      }
+    });
+  }
+  function setHpEffectValue(key, raw) {
+    const n = parseInt(raw);
+    if (!isNaN(n) && n >= 0 && !state.hpEffects[key].active) {
+      state.hpEffects[key].value = n;
+      saveState();
+    }
+  }
+  function toggleStatus() {
+    update(s => s.statusOpen = !s.statusOpen);
+  }
+
+  function toggleSpellsSection() {
+    update(s => s.spellsOpen = !s.spellsOpen);
+  }
+  function renderStatus() {
+    const spells = state.activeSpells;
+    const open = state.statusOpen;
+    const spellsOpen = state.spellsOpen;
+
+    const spellsBody = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${spellsOpen ? '6px' : '0'};">
+        <span style="font-size:0.65rem;color:#4a7a8a;text-transform:uppercase;letter-spacing:0.1em;">Active Spells</span>
+        <span style="display:flex;gap:4px;align-items:center;">
+          ${spellsOpen ? `<button class="btn-sm" onclick="addActiveSpell()">+</button>` : ''}
+          <button class="btn-sm" onclick="toggleSpellsSection()" style="padding:0 5px;">${spellsOpen ? '▲' : '▼'}</button>
+        </span>
+      </div>
+      ${spellsOpen ? `
+        ${spells.length === 0 ? '<div class="no-spells">None active</div>' : ''}
+        ${spells.map((sp, i) => `
+          <div class="active-spell">
+            <span class="spell-name">${sp.name}</span>
+            ${sp.concentration ? '<span class="conc-badge">C</span>' : ''}
+            <button class="spell-remove" onclick="removeActiveSpell(${i})" title="End spell">✕</button>
+          </div>
+        `).join('')}
+      ` : ''}
+    `;
+
+    const fx = state.hpEffects;
+    const hpFxBody = `
+      <div style="border-top:1px solid #0f2535;margin:10px 0 8px;"></div>
+      <div style="font-size:0.65rem;color:#4a7a8a;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">HP Effects</div>
+      ${[
+        { key: 'aid',            label: 'Aid',           color: '#2a8a6a' },
+        { key: 'heroesFeast',    label: "Heroes' Feast",  color: '#2a8a6a' },
+        { key: 'maxHpReduction', label: 'Max HP −',      color: '#8a2a2a' },
+      ].map(({ key, label, color }) => {
+        const ef = fx[key];
+        return `
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+            <span style="flex:1;font-size:0.8rem;color:#8ab8c8;">${label}</span>
+            <input type="number" min="0" value="${ef.value}"
+              onchange="setHpEffectValue('${key}', this.value)"
+              ${ef.active ? 'disabled' : ''}
+              style="width:42px;background:${ef.active ? '#0a1e2a' : '#0f2535'};border:1px solid #1a3a4a;color:${ef.active ? '#4a7a8a' : '#8ab8c8'};padding:2px 4px;border-radius:3px;font-size:0.8rem;text-align:right;">
+            <button class="btn-sm" onclick="toggleHpEffect('${key}')"
+              style="padding:2px 8px;background:${ef.active ? color : 'transparent'};border:1px solid ${color};color:${ef.active ? '#fff' : color};border-radius:3px;font-size:0.75rem;cursor:pointer;">
+              ${ef.active ? 'ON' : 'OFF'}
+            </button>
+          </div>
+        `;
+      }).join('')}
+    `;
+
+    const condsBody = `
+      <div style="border-top:1px solid #0f2535;margin:10px 0 8px;"></div>
+      ${renderConditions()}
+    `;
+
+    document.getElementById('status-section').innerHTML = `
+      <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Status</span>
+        <button class="btn-sm" onclick="toggleStatus()">${open ? '▲' : '▼'}</button>
+      </div>
+      ${open ? spellsBody + hpFxBody + condsBody : ''}
+    `;
+  }
+  function addActiveSpell() {
+    const name = prompt('Spell name:');
+    if (!name || !name.trim()) return;
+    const isConc = confirm(`Is ${name.trim()} a Concentration spell?`);
+    if (isConc) {
+      const existing = state.activeSpells.findIndex(s => s.concentration);
+      if (existing >= 0) {
+        if (!confirm(`Drop ${state.activeSpells[existing].name} and concentrate on ${name.trim()}?`)) return;
+        update(s => {
+          s.activeSpells.splice(existing, 1);
+          s.activeSpells.push({ name: name.trim(), concentration: true });
+        });
+        return;
+      }
+    }
+    update(s => s.activeSpells.push({ name: name.trim(), concentration: isConc }));
+  }
+  function removeActiveSpell(idx) {
+    update(s => s.activeSpells.splice(idx, 1));
+  }
+
+  // === COLUMN DRAG STATE ===
+  let colDragState = null;
+
+  document.addEventListener('mousemove', e => {
+    const z = panelZoom();
+    const mx = e.clientX / z, my = e.clientY / z;
+    if (draggingPanel) {
+      const panel = document.getElementById('stat-panel');
+      panel.style.left = (mx - dragOffsetX) + 'px';
+      panel.style.top  = Math.max(0, (my - dragOffsetY)) + 'px';
+    }
+    if (draggingLore) {
+      const panel = document.getElementById('lore-panel');
+      panel.style.left = (mx - loreDragOffsetX) + 'px';
+      panel.style.top  = Math.max(0, (my - loreDragOffsetY)) + 'px';
+    }
+    if (panelResizeState) {
+      const { edge, startX, startY, startW, startH, startLeft, startTop } = panelResizeState;
+      const dx = mx - startX;
+      const dy = my - startY;
+      const panel = document.getElementById('stat-panel');
+      if (edge.includes('e'))  panel.style.width  = Math.max(280, startW + dx) + 'px';
+      if (edge.includes('s'))  panel.style.height = Math.max(160, startH + dy) + 'px';
+      if (edge.includes('w')) {
+        const newW = Math.max(280, startW - dx);
+        panel.style.width = newW + 'px';
+        panel.style.left  = (startLeft + startW - newW) + 'px';
+      }
+      if (edge.includes('n')) {
+        const newH = Math.max(160, startH - dy);
+        const rawTop = startTop + startH - newH;
+        const clampedTop = Math.max(0, rawTop);
+        panel.style.height = (newH - (clampedTop - rawTop)) + 'px';
+        panel.style.top    = clampedTop + 'px';
+      }
+    }
+    if (loreResizeState) {
+      const { edge, startX, startY, startW, startH, startLeft, startTop } = loreResizeState;
+      const dx = mx - startX;
+      const dy = my - startY;
+      const panel = document.getElementById('lore-panel');
+      if (edge.includes('e'))  panel.style.width  = Math.max(280, startW + dx) + 'px';
+      if (edge.includes('s'))  panel.style.height = Math.max(160, startH + dy) + 'px';
+      if (edge.includes('w')) {
+        const newW = Math.max(280, startW - dx);
+        panel.style.width = newW + 'px';
+        panel.style.left  = (startLeft + startW - newW) + 'px';
+      }
+      if (edge.includes('n')) {
+        const newH = Math.max(160, startH - dy);
+        const rawTop = startTop + startH - newH;
+        const clampedTop = Math.max(0, rawTop);
+        panel.style.height = (newH - (clampedTop - rawTop)) + 'px';
+        panel.style.top    = clampedTop + 'px';
+      }
+    }
+    if (!colDragState) return;
+    const cols = document.querySelector('.columns');
+    const totalW = cols.offsetWidth;
+    const dx = e.clientX - colDragState.startX;
+    if (colDragState.side === 'left') {
+      colDragState.currentLeftW = Math.max(180, Math.min(
+        colDragState.startLeftW + dx,
+        totalW - colDragState.startRightW - 200
+      ));
+    } else {
+      colDragState.currentRightW = Math.max(220, Math.min(
+        colDragState.startRightW - dx,
+        totalW - colDragState.startLeftW - 200
+      ));
+    }
+    applyColWidths(colDragState.currentLeftW, colDragState.currentRightW);
+  });
+  document.addEventListener('mouseup', () => {
+    if (draggingPanel || panelResizeState || draggingLore || loreResizeState) {
+      draggingPanel = false;
+      panelResizeState = null;
+      draggingLore = false;
+      loreResizeState = null;
+      document.getElementById('drag-shield').classList.remove('active');
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+    if (colDragState) {
+      const { currentLeftW, currentRightW } = colDragState;
+      document.querySelectorAll('.col-handle').forEach(h => h.classList.remove('dragging'));
+      colDragState = null;
+      update(s => { s.layout.leftW = currentLeftW; s.layout.rightW = currentRightW; });
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+  });
+
+  document.addEventListener('dragover', e => {
+    e.preventDefault();
+    document.querySelector('.drop-hint-strip')?.classList.add('drag-over');
+    document.querySelector('.stat-preview-hint')?.classList.add('drag-over');
+  });
+  document.addEventListener('dragleave', e => {
+    if (!e.relatedTarget || e.relatedTarget === document.documentElement) {
+      document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+    }
+  });
+  document.addEventListener('drop', handleFileDrop);
+
+  // === COLUMN DRAG HANDLES ===
+
+  function applyColWidths(leftW, rightW) {
+    leftW = leftW ?? state.layout.leftW;
+    rightW = rightW ?? state.layout.rightW;
+    const cols = document.querySelector('.columns');
+    if (!cols) return;
+    cols.style.gridTemplateColumns = `${leftW}px 1fr ${rightW}px`;
+    const h1 = document.getElementById('col-handle-1');
+    const h2 = document.getElementById('col-handle-2');
+    if (h1) h1.style.left = leftW + 'px';
+    if (h2) h2.style.left = (cols.offsetWidth - rightW) + 'px';
+  }
+
+  function initColHandles() {
+    const cols = document.querySelector('.columns');
+    ['col-handle-1', 'col-handle-2'].forEach(id => {
+      if (!document.getElementById(id)) {
+        const h = document.createElement('div');
+        h.className = 'col-handle';
+        h.id = id;
+        cols.appendChild(h);
+      }
+    });
+    document.getElementById('col-handle-1').onmousedown = e => startColDrag(e, 'left');
+    document.getElementById('col-handle-2').onmousedown = e => startColDrag(e, 'right');
+    applyColWidths();
+  }
+
+  function startColDrag(e, side) {
+    e.preventDefault();
+    e.stopPropagation();
+    colDragState = {
+      side,
+      startX: e.clientX,
+      startLeftW: state.layout.leftW,
+      startRightW: state.layout.rightW,
+      currentLeftW: state.layout.leftW,
+      currentRightW: state.layout.rightW
+    };
+    e.currentTarget.classList.add('dragging');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }
+
+
+  // === LORE BOOK ===
+  function addLorePage() {
+    const title = prompt('Page title:');
+    if (!title?.trim()) return;
+    const id = Date.now().toString();
+    update(s => {
+      s.loreBook.push({ id, title: title.trim(), content: '' });
+      s.loreActiveId = id;
+    });
+    renderLorePanel();
+  }
+
+  function renameLorePage() {
+    if (!state.loreActiveId) return;
+    const page = state.loreBook.find(p => p.id === state.loreActiveId);
+    if (!page) return;
+    const val = prompt('Rename page:', page.title);
+    if (val?.trim()) {
+      update(s => s.loreBook.find(p => p.id === state.loreActiveId).title = val.trim());
+      renderLorePanel();
+    }
+  }
+
+  function deleteLorePage() {
+    if (!state.loreActiveId) return;
+    const page = state.loreBook.find(p => p.id === state.loreActiveId);
+    if (!page || !confirm(`Delete page "${page.title}"?`)) return;
+    update(s => {
+      s.loreBook = s.loreBook.filter(p => p.id !== state.loreActiveId);
+      s.loreActiveId = s.loreBook.length > 0 ? s.loreBook[s.loreBook.length - 1].id : null;
+    });
+    renderLorePanel();
+  }
+
+  function switchLorePage(id) {
+    update(s => s.loreActiveId = id);
+    lorePageMenuOpen = false;
+    document.getElementById('lore-page-menu')?.classList.add('hidden');
+    renderLorePanel();
+  }
+
+  function updateLoreContent(value) {
+    if (!state.loreActiveId) return;
+    update(s => {
+      const page = s.loreBook.find(p => p.id === state.loreActiveId);
+      if (page) page.content = value;
+    });
+  }
+
+  function renderLorePanel() {
+    const { loreBook, loreActiveId } = state;
+    const activePage = loreBook.find(p => p.id === loreActiveId) || null;
+
+    // Update page dropdown button label
+    const pageBtn = document.getElementById('lore-page-btn');
+    if (pageBtn) pageBtn.textContent = activePage ? activePage.title + ' ▾' : '— no pages — ▾';
+
+    // Rebuild page menu
+    const menu = document.getElementById('lore-page-menu');
+    if (menu) {
+      menu.innerHTML = loreBook.map(p =>
+        `<button class="${p.id === loreActiveId ? 'mat-active' : ''}" onclick="switchLorePage('${p.id}')">${p.title}</button>`
+      ).join('') + (loreBook.length > 0 ? '<hr class="mat-divider">' : '') +
+      `<button onclick="addLorePage()">+ Add page…</button>`;
+    }
+
+    // Show/hide empty state and textarea
+    const empty = document.getElementById('lore-empty');
+    const textarea = document.getElementById('lore-textarea');
+    if (!activePage) {
+      if (empty) empty.style.display = 'block';
+      if (textarea) textarea.style.display = 'none';
+    } else {
+      if (empty) empty.style.display = 'none';
+      if (textarea) {
+        textarea.style.display = 'block';
+        textarea.value = activePage.content;
+      }
+    }
+  }
+
+  function exportLore() {
+    const filename = 'lore-book.json';
+    const blob = new Blob([JSON.stringify(state.loreBook, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function importLore() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = evt => {
+        try {
+          const parsed = JSON.parse(evt.target.result);
+          if (!Array.isArray(parsed)) throw new Error('Expected an array of pages');
+          update(s => {
+            s.loreBook = parsed;
+            s.loreActiveId = parsed.length > 0 ? parsed[0].id : null;
+          });
+          renderLorePanel();
+        } catch (err) { alert('Import failed: ' + err.message); }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  }
+
+  // === RENDER ===
+  function render() {
+    renderHeader();
+    renderHP();
+    renderStatus();
+    renderSlots();
+    document.getElementById('attacks-section-wrap').innerHTML = renderAttacks();
+    document.getElementById('inventory-wrap').innerHTML = renderInventory();
+    document.getElementById('feats-wrap').innerHTML = renderFeats();
+    document.getElementById('skills-wrap').innerHTML = renderSkills();
+    applyColWidths();
+    renderLorePanel();
+  }
+
+  render();
+  initColHandles();
+  window.addEventListener('resize', () => applyColWidths());
+</script>
+</body>
+</html>
