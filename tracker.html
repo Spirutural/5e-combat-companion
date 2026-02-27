@@ -1123,6 +1123,39 @@
       font-family: 'Inter', sans-serif;
     }
     .btn-help:hover { border-color: #4a8a9a; color: #a8d8e8; }
+
+    /* === CONDITIONS DROPDOWN === */
+    .conditions-dropdown-wrap { position: relative; }
+    .conditions-panel {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      background: #071824;
+      border: 1px solid #1a3a4a;
+      border-radius: 4px;
+      width: 300px;
+      max-height: 420px;
+      overflow-y: auto;
+      z-index: 100;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    }
+    .conditions-panel.hidden { display: none; }
+    .condition-entry {
+      padding: 8px 12px;
+      border-bottom: 1px solid #0f2535;
+    }
+    .condition-entry:last-child { border-bottom: none; }
+    .condition-name {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #a8d8e8;
+      margin-bottom: 3px;
+    }
+    .condition-effect {
+      font-size: 0.72rem;
+      color: #6a9aaa;
+      line-height: 1.45;
+    }
   </style>
 </head>
 <body>
@@ -2204,6 +2237,26 @@
   // === HEADER ===
   let restMenuOpen = false;
   let materialsMenuOpen = false;
+  let conditionsMenuOpen = false;
+
+  const CONDITIONS = [
+    { name: 'Blinded',        effect: "Can't see; auto-fails sight-based checks. Attackers have advantage; creature has disadvantage on attacks." },
+    { name: 'Charmed',        effect: "Can't attack the charmer or target them with harmful effects. Charmer has advantage on social checks with the creature." },
+    { name: 'Deafened',       effect: "Can't hear; auto-fails hearing-based checks." },
+    { name: 'Exhaustion',     effect: "Level 1: Disadvantage on ability checks. Level 2: Speed halved. Level 3: Disadvantage on attacks and saves. Level 4: HP max halved. Level 5: Speed = 0. Level 6: Death. Each long rest removes one level." },
+    { name: 'Frightened',     effect: "Disadvantage on ability checks and attack rolls while the source is in sight. Can't willingly move closer to the source." },
+    { name: 'Grappled',       effect: "Speed becomes 0. Ends if the grappler is incapacitated or the creature is removed from reach." },
+    { name: 'Incapacitated',  effect: "Can't take actions or reactions." },
+    { name: 'Invisible',      effect: "Can't be seen without magic or special senses. Creature's attacks have advantage; attacks against it have disadvantage." },
+    { name: 'Paralyzed',      effect: "Incapacitated; can't move or speak. Auto-fails STR and DEX saves. Attackers have advantage. Hits from within 5 ft are critical hits." },
+    { name: 'Petrified',      effect: "Transformed to inanimate substance. Incapacitated; unaware of surroundings. Auto-fails STR and DEX saves. Attackers have advantage. Resistance to all damage. Immune to poison and disease (existing ones suspended)." },
+    { name: 'Poisoned',       effect: "Disadvantage on attack rolls and ability checks." },
+    { name: 'Prone',          effect: "Can only crawl unless it stands up (costs half speed). Disadvantage on attacks. Attackers within 5 ft have advantage; others have disadvantage." },
+    { name: 'Restrained',     effect: "Speed becomes 0. Attackers have advantage. Creature has disadvantage on attacks and DEX saves." },
+    { name: 'Stunned',        effect: "Incapacitated; can't move; speaks only falteringly. Auto-fails STR and DEX saves. Attackers have advantage." },
+    { name: 'Unconscious',    effect: "Incapacitated; unaware; drops held items; falls prone. Auto-fails STR and DEX saves. Attackers have advantage. Hits from within 5 ft are critical hits." },
+  ];
+
   function toggleFormulaPanel() {
     const panel = document.getElementById('formula-panel');
     panel.classList.toggle('open');
