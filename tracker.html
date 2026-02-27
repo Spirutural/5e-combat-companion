@@ -1170,12 +1170,35 @@
   if (!state.senses) state.senses = { truesight: 0, blindsight: 0, tremorsense: 0 };
   if (state.sensesOpen === undefined) state.sensesOpen = false;
   if (!state.attacks) state.attacks = [];
-  if (!state.inventory) state.inventory = [];
+  // Migrate from old inventory/magicItems to unified items
+  if (state.items === undefined) {
+    state.items = [
+      ...(state.inventory || []).map(i => ({
+        ...i,
+        type: 'normal',
+        equipped: false,
+        attuned: false,
+        description: i.description ?? ''
+      })),
+      ...(state.magicItems || []).map(i => ({
+        ...i,
+        type: 'magic',
+        description: i.description ?? ''
+      }))
+    ];
+    delete state.inventory;
+    delete state.magicItems;
+  }
+  if (!state.items) state.items = [];
   if (state.inventoryOpen === undefined) state.inventoryOpen = false;
-  if (!state.magicItems) state.magicItems = [];
-  if (state.magicItemsOpen === undefined) state.magicItemsOpen = false;
   if (state.attunementMax === undefined) state.attunementMax = 3;
-  if (state.attunedOpen === undefined) state.attunedOpen = true;
+  state.items.forEach(i => {
+    if (i.description === undefined) i.description = '';
+    if (i.qty === undefined) i.qty = '1';
+    if (i.type === undefined) i.type = 'normal';
+    if (i.equipped === undefined) i.equipped = false;
+    if (i.attuned === undefined) i.attuned = false;
+  });
   if (state.characterName === undefined) state.characterName = 'Character';
   if (state.statusOpen === undefined) state.statusOpen = true;
   if (state.layout.rightW < 340) state.layout.rightW = 360;
@@ -1184,8 +1207,6 @@
   if (!state.skills) state.skills = { ...DEFAULTS.skills };
   if (!state.customSkills) state.customSkills = [];
   if (!state.currency) state.currency = { pp: 0, gp: 0, sp: 0, cp: 0 };
-  state.inventory.forEach(i => { if (i.description === undefined) i.description = ''; if (i.qty === undefined) i.qty = '1'; });
-  state.magicItems.forEach(i => { if (i.description === undefined) i.description = ''; if (i.qty === undefined) i.qty = '1'; });
   if (!state.hpEffects) state.hpEffects = JSON.parse(JSON.stringify(DEFAULTS.hpEffects));
   if (state.stats.speedSwim === undefined) state.stats.speedSwim = 0;
   if (state.stats.speedClimb === undefined) state.stats.speedClimb = 0;
