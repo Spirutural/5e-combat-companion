@@ -1512,6 +1512,10 @@
     slotsVisible: true,
     senses: { truesight: 0, blindsight: 0, tremorsense: 0 },
     sensesOpen: false,
+    charOpen: true,
+    statsOpen: true,
+    scoresOpen: true,
+    savesOpen: true,
     attacks: [],
     items: [],
     inventoryOpen: false,
@@ -1626,6 +1630,10 @@
   });
   if (state.layout.rightW < 340) state.layout.rightW = 360;
   if (!state.saveProfs) state.saveProfs = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 };
+  if (state.charOpen   === undefined) state.charOpen   = true;
+  if (state.statsOpen  === undefined) state.statsOpen  = true;
+  if (state.scoresOpen === undefined) state.scoresOpen = true;
+  if (state.savesOpen  === undefined) state.savesOpen  = true;
   if (state.skillsOpen === undefined) state.skillsOpen = true;
   if (!state.skills) state.skills = { ...DEFAULTS.skills };
   if (!state.customSkills) state.customSkills = [];
@@ -1653,24 +1661,33 @@
   let itemDescEdit = null; // id of item currently being edited
   let helpOpen = false;
 
-  function sectionTitle(label, key) {
+  function sectionTitle(label, key, toggleFn, isOpen) {
     if (!key) return `<div class="panel-title">${label}</div>`;
     const editing = editSection === key;
+    const chevron = toggleFn
+      ? `<button class="edit-pencil-btn" onclick="event.stopPropagation();${toggleFn}()" title="${isOpen ? 'Collapse' : 'Expand'}" style="font-size:0.62rem;">${isOpen ? '▲' : '▼'}</button>`
+      : '';
+    const titleClick = toggleFn ? `onclick="${toggleFn}()" style="cursor:pointer;"` : '';
     return `
-      <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
+      <div class="panel-title" ${titleClick} style="display:flex;align-items:center;justify-content:space-between;${toggleFn ? 'cursor:pointer;' : ''}">
         <span>${label}</span>
         ${editing
           ? `<span class="section-edit-controls">
                <button class="edit-save-btn" onclick="saveSection('${key}')">Save</button>
                <button class="edit-cancel-btn" onclick="setEditSection(null)">✕</button>
              </span>`
-          : `<button class="edit-pencil-btn" onclick="setEditSection('${key}')" title="Edit">✏</button>`
+          : `<span style="display:flex;gap:4px;align-items:center;">
+               <button class="edit-pencil-btn" onclick="event.stopPropagation();setEditSection('${key}')" title="Edit">✏</button>
+               ${chevron}
+             </span>`
         }
       </div>`;
   }
 
   function setEditSection(key) {
     editSection = key;
+    const expandMap = { hp: 'charOpen', combat: 'statsOpen', scores: 'scoresOpen', saves: 'savesOpen' };
+    if (key && expandMap[key] && !state[expandMap[key]]) { state[expandMap[key]] = true; saveState(); }
     if (key === 'senses' && !state.sensesOpen) { state.sensesOpen = true; saveState(); }
     render();
   }
@@ -1746,8 +1763,9 @@
     const isSaves  = editSection === 'saves';
 
     el.innerHTML = `
-      ${sectionTitle('Character', 'hp')}
+      ${sectionTitle('Character', 'hp', 'toggleCharOpen', state.charOpen)}
 
+      ${state.charOpen ? `
       <div class="hp-section">
         <div class="hp-label">Base Form</div>
         <div class="hp-bar-track"><div class="hp-bar-fill ${hpCls}" style="width:${basePct}%"></div></div>
@@ -1768,9 +1786,9 @@
             <button class="btn-sm" onclick="promptTemp()">Set</button>
           </div>
         `}
-      </div>
+      </div>` : ''}
 
-      <div style="margin-top:4px;padding:2px 0;">
+      ${state.charOpen ? `<div style="margin-top:4px;padding:2px 0;">
         <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:3px 0;" onclick="toggleHitDice()">
           <span style="font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:#4a7a8a;">Hit Dice</span>
           <span style="display:flex;align-items:center;gap:6px;">
@@ -1804,11 +1822,11 @@
             </div>
           </div>
         ` : ''}
-      </div>
+      </div>` : ''}
 
       <hr class="divider">
-      ${sectionTitle('Stats', 'combat')}
-      ${isStats ? `
+      ${sectionTitle('Stats', 'combat', 'toggleStatsOpen', state.statsOpen)}
+      ${state.statsOpen ? isStats ? `
         <div class="stat-row"><span class="stat-label">AC</span><input class="edit-input-sm" id="edit-ac" type="number" value="${st.ac}"></div>
         <div class="stat-row"><span class="stat-label">Initiative</span><input class="edit-input-sm" id="edit-initiative" type="number" value="${st.initiative}"></div>
         <div class="stat-row"><span class="stat-label">Walk ft.</span><input class="edit-input-sm" id="edit-speed" type="number" value="${st.speed}"></div>
@@ -1839,11 +1857,11 @@
         ` : ''}
         <div class="stat-row"><span class="stat-label">Proficiency</span><span class="stat-value editable-stat" onclick="editProfBonus()" title="Click to edit">+${state.profBonus}</span></div>
         <div class="stat-row"><span class="stat-label">Pass. Percep.</span><span class="stat-value editable-stat" onclick="editStat('passPerc')" title="Click to edit">${st.passPerc}</span></div>
-      `}
+      ` : ''}
 
       <hr class="divider">
-      ${sectionTitle('Ability Scores', 'scores')}
-      <div class="saves-grid">
+      ${sectionTitle('Ability Scores', 'scores', 'toggleScoresOpen', state.scoresOpen)}
+      ${state.scoresOpen ? `<div class="saves-grid">
         ${[['STR','str'],['DEX','dex'],['CON','con'],['INT','int'],['WIS','wis'],['CHA','cha']].map(([name, key]) => {
           const score = st[key];
           const mod = Math.floor((score - 10) / 2);
@@ -1852,11 +1870,11 @@
             ? `<div class="save-row"><span class="save-name">${name}</span><input class="edit-input-sm" id="edit-${key}" type="number" min="1" max="30" value="${score}"></div>`
             : `<div class="save-row"><span class="save-name">${name}</span><span class="save-val editable-stat" onclick="editStat('${key}')" title="Click to edit">${score} <span style="color:#5a8a9a;font-weight:400">(${sign}${mod})</span></span></div>`;
         }).join('')}
-      </div>
+      </div>` : ''}
 
       <hr class="divider">
-      ${sectionTitle('Saves', 'saves')}
-      <div class="saves-grid">
+      ${sectionTitle('Saves', 'saves', 'toggleSavesOpen', state.savesOpen)}
+      ${state.savesOpen ? `<div class="saves-grid">
         ${[['STR','str'],['DEX','dex'],['CON','con'],['INT','int'],['WIS','wis'],['CHA','cha']].map(([name, abKey]) => {
           const savKey = 'sav' + abKey.charAt(0).toUpperCase() + abKey.slice(1);
           const pipState = state.saveProfs[abKey];
@@ -1881,7 +1899,7 @@
               <span class="save-val">${sign}${total}${flatBonus !== 0 ? `<span style="font-size:0.65rem;color:#c8904a;margin-left:2px;">${flatBonus >= 0 ? '+' : ''}${flatBonus}</span>` : ''}</span>
             </div>`;
         }).join('')}
-      </div>
+      </div>` : ''}
 
       ${renderSenses()}
 
@@ -1890,6 +1908,10 @@
     `;
   }
 
+  function toggleCharOpen()   { update(s => s.charOpen   = !s.charOpen); }
+  function toggleStatsOpen()  { update(s => s.statsOpen  = !s.statsOpen); }
+  function toggleScoresOpen() { update(s => s.scoresOpen = !s.scoresOpen); }
+  function toggleSavesOpen()  { update(s => s.savesOpen  = !s.savesOpen); }
   function toggleHitDice() {
     update(s => s.hitDice.open = !s.hitDice.open);
   }
