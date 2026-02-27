@@ -1667,9 +1667,9 @@
     const chevron = toggleFn
       ? `<button class="btn-sm" onclick="event.stopPropagation();${toggleFn}()" style="padding:0 6px;">${isOpen ? '▲' : '▼'}</button>`
       : '';
-    const titleClick = toggleFn ? `onclick="${toggleFn}()" style="cursor:pointer;"` : '';
+    const titleOnClick = toggleFn ? `onclick="${toggleFn}()"` : '';
     return `
-      <div class="panel-title" ${titleClick} style="display:flex;align-items:center;justify-content:space-between;${toggleFn ? 'cursor:pointer;' : ''}">
+      <div class="panel-title" ${titleOnClick} style="display:flex;align-items:center;justify-content:space-between;${toggleFn ? 'cursor:pointer;' : ''}">
         <span>${label}</span>
         ${editing
           ? `<span class="section-edit-controls">
