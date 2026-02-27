@@ -1,5 +1,28 @@
 # Changelog
 
+## v1.3.0 — 2026-02-26
+
+### Hit Dice
+- **Hit Dice tracker** added below the HP bar — collapsible, heart-pip display (♥ = available, ♡ = spent)
+- Set max dice and die type (d6 / d8 / d10 / d12) via inline controls when expanded
+- Click a filled heart to spend a die; click an empty heart to restore one
+
+### Magic Item Charges
+- Magic items now support an optional **charge tracker** — set a max via a number input in the expanded item section
+- Amber pip row (⚡ ●●●○○) appears inline below the item name when charges are enabled
+- Click any pip to spend down to that point or restore up to it
+- Charges are fully manual — no automatic restoration on rest
+
+### Skills
+- **Flat bonus** per skill — click the calculated skill value to set an additional modifier (for racial bonuses, item bonuses, etc.)
+- Skill pip turns **red** when a flat bonus is active, making overrides visible at a glance
+
+### Inventory
+- **Click item name** to expand/collapse its description — no need to find the ▶ button
+- Item rename now requires **double-click** to prevent accidental prompts
+
+---
+
 ## v1.2.0 — 2026-02-26
 
 ### Feats

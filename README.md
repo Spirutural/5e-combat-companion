@@ -8,6 +8,7 @@ A single-file D&D 5e combat tracker for experienced players. No install, no serv
 - HP tracking with color-reactive bar (green → yellow → red)
 - Temp HP, editable current/max HP
 - HP Effects: Aid, Heroes' Feast, and Max HP Reduction toggles with correct 5e math
+- **Hit Dice tracker** — collapsible heart-pip display below HP bar, configurable die type (d6–d12)
 
 **Stats**
 - Ability scores with auto-calculated modifiers
@@ -20,6 +21,7 @@ A single-file D&D 5e combat tracker for experienced players. No install, no serv
 - Saving throws with 3-state proficiency pips (none / proficient / expertise)
 - Full skills section with auto-calculated modifiers, 3-state pips
 - Custom skills support
+- Click any skill value to set a flat bonus (racial, item, etc.) — pip turns red when active
 
 **Spellcasting**
 - Spell Save DC and Spell Attack (auto-calculated, manual override available)
@@ -38,7 +40,9 @@ A single-file D&D 5e combat tracker for experienced players. No install, no serv
 - Magic items have Equipped and Attuned toggles; Attuned section shows pip display
 - Adjustable attunement slot cap
 - Quantity +/− buttons on all items
+- Click item name to expand description; double-click to rename
 - Collapsible item descriptions with double-click to edit
+- Magic items support an optional **charge tracker** — amber pip row, configurable max, fully manual
 - Currency tracker: PP / GP / SP / CP
 
 **Feats**
@@ -73,7 +77,6 @@ Class-specific variants (Druid with Wild Shape, etc.) are maintained on separate
 
 **Planned**
 - Prepared spells — manual spell list folded into the Spell Slots panel, organized by level
-- Magic item charges — pip-based charge tracker per item (Wand of Magic Missiles, etc.)
-- Class resource blocks — Bardic Inspiration, Channel Divinity, Action Surge, Ki Points, etc. as named pip counters, toggled on per-class via a Settings panel; supports multiclassing and feat-granted class features
-- Lore Book — floating notes panel with session-by-session import/export, separate from character data
 - Combat section revamp — Actions, Bonus Actions, and Reactions in labelled columns with one-click dice rolls wired to the existing roller
+- Lore Book — floating notes panel with session-by-session import/export, separate from character data
+- Class resource blocks — Bardic Inspiration, Channel Divinity, Action Surge, Ki Points, etc. (deferred; tied to class variant system)
