@@ -1240,6 +1240,7 @@
   const DEFAULTS = {
     characterName: 'Character',
     hp: { current: 100, max: 100, temp: 0 },
+    hitDice: { max: 0, current: 0, dieType: 'd8', open: false },
     slots: [4, 3, 3, 3, 3, 2, 2, 1, 1],
     activeSpells: [],
     conditions: [],
@@ -1309,6 +1310,8 @@
   let diceCount = 1;
   let diceMenuOpen = false;
   // Migrate older saved states that lack newer fields
+  if (!state.hitDice) state.hitDice = { max: 0, current: 0, dieType: 'd8', open: false };
+  if (state.hitDice.open === undefined) state.hitDice.open = false;
   if (!state.stats) state.stats = { ...DEFAULTS.stats };
   if (!state.immunities) state.immunities = [];
   if (!state.resistances) state.resistances = [];
@@ -1505,6 +1508,42 @@
         `}
       </div>
 
+      <div style="margin-top:4px;padding:2px 0;">
+        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:3px 0;" onclick="toggleHitDice()">
+          <span style="font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:#4a7a8a;">Hit Dice</span>
+          <span style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:0.7rem;color:#5a8a9a;">${state.hitDice.current}/${state.hitDice.max} ${state.hitDice.dieType}</span>
+            <span style="font-size:0.65rem;color:#3a6a7a;">${state.hitDice.open ? '▲' : '▼'}</span>
+          </span>
+        </div>
+        ${state.hitDice.open ? `
+          <div style="padding:4px 0 2px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span style="font-size:0.72rem;color:#5a8a9a;">Max</span>
+              <input type="number" min="0" max="30" value="${state.hitDice.max}"
+                onchange="setHitDiceMax(this.value)"
+                style="width:36px;background:#0f2535;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.72rem;text-align:center;">
+              <select onchange="setHitDieType(this.value)"
+                style="background:#0f2535;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.72rem;">
+                ${['d6','d8','d10','d12'].map(d => `<option value="${d}" ${state.hitDice.dieType === d ? 'selected' : ''}>${d}</option>`).join('')}
+              </select>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:2px;">
+              ${state.hitDice.max === 0
+                ? '<span style="font-size:0.72rem;color:#2a4a5a;">Set a max to track hit dice</span>'
+                : Array.from({length: state.hitDice.max}, (_, idx) => `
+                    <span onclick="clickHitDie(${idx})"
+                      title="${idx < state.hitDice.current ? 'Click to spend' : 'Click to restore'}"
+                      style="cursor:pointer;font-size:1.1rem;line-height:1;color:${idx < state.hitDice.current ? '#e05070' : '#2a4a5a'};">
+                      ${idx < state.hitDice.current ? '♥' : '♡'}
+                    </span>
+                  `).join('')
+              }
+            </div>
+          </div>
+        ` : ''}
+      </div>
+
       <hr class="divider">
       ${sectionTitle('Stats', 'combat')}
       ${isStats ? `
@@ -1581,6 +1620,24 @@
     `;
   }
 
+  function toggleHitDice() {
+    update(s => s.hitDice.open = !s.hitDice.open);
+  }
+  function clickHitDie(idx) {
+    update(s => {
+      s.hitDice.current = s.hitDice.current > idx ? idx : idx + 1;
+    });
+  }
+  function setHitDiceMax(val) {
+    const max = Math.max(0, parseInt(val) || 0);
+    update(s => {
+      s.hitDice.max = max;
+      s.hitDice.current = Math.min(s.hitDice.current, max);
+    });
+  }
+  function setHitDieType(val) {
+    update(s => s.hitDice.dieType = val);
+  }
   function adjustHP(delta) {
     update(s => s.hp.current = Math.max(0, Math.min(s.hp.max, s.hp.current + delta)));
   }
