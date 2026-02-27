@@ -2304,6 +2304,17 @@
           <button onclick="openMaterialFile()">+ Add file…</button>
         </div>
       </div>
+      <div class="conditions-dropdown-wrap">
+        <button class="formula-dropdown-btn" onclick="toggleConditionsPanel(); event.stopPropagation();">Conditions ▾</button>
+        <div class="conditions-panel${conditionsMenuOpen ? '' : ' hidden'}" id="conditions-panel">
+          ${CONDITIONS.map(c => `
+            <div class="condition-entry">
+              <div class="condition-name">${c.name}</div>
+              <div class="condition-effect">${c.effect}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
       <div class="formula-dropdown-wrap">
         <button class="formula-dropdown-btn" onclick="toggleFormulaPanel(); event.stopPropagation();">Formulas ▾</button>
         <div class="formula-panel" id="formula-panel">
@@ -2367,6 +2378,18 @@
       if (menu) menu.classList.add('hidden');
     }
   });
+  function toggleConditionsPanel() {
+    conditionsMenuOpen = !conditionsMenuOpen;
+    const panel = document.getElementById('conditions-panel');
+    if (panel) panel.classList.toggle('hidden', !conditionsMenuOpen);
+  }
+  document.addEventListener('click', e => {
+    if (conditionsMenuOpen && !e.target.closest('.conditions-dropdown-wrap')) {
+      conditionsMenuOpen = false;
+      document.getElementById('conditions-panel')?.classList.add('hidden');
+    }
+  });
+
   // === ATTUNED ITEMS ===
   function increaseAttunementMax() {
     update(s => s.attunementMax++);
