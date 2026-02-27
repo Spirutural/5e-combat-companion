@@ -2502,8 +2502,8 @@
           <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
             ${pips}
             <span class="attuned-counter ${over ? 'over' : ''}">${attunedCount} / ${attunementMax}</span>
-            <button class="btn-add-attunement-slot" onclick="decreaseAttunementMax()">−</button>
-            <button class="btn-add-attunement-slot" onclick="increaseAttunementMax()">+</button>
+            <button class="btn-sm" onclick="decreaseAttunementMax()" style="padding:0 6px;">−</button>
+            <button class="btn-sm" onclick="increaseAttunementMax()" style="padding:0 6px;">+</button>
           </div>
           ${attunedItems.length === 0
             ? '<div style="font-size:0.75rem;color:#2a4a5a;padding:4px 0;">No attuned items</div>'
