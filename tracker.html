@@ -1929,11 +1929,10 @@
   }
 
   function longRest() {
-    if (confirm('Long rest? This restores all spell slots, HP, and item charges.')) {
+    if (confirm('Long rest? This restores all spell slots and HP.')) {
       update(s => {
         s.slots = [...SLOT_MAX];
         s.hp.current = s.hp.max;
-        s.items.forEach(i => { if (i.chargeMax > 0) i.chargeCurrent = i.chargeMax; });
       });
     }
   }
@@ -2672,7 +2671,7 @@
                     onchange="setItemChargeMax('${i.id}',this.value)"
                     style="width:40px;background:#0f2535;border:1px solid #1a3a4a;color:#8ab8c8;padding:2px 4px;border-radius:3px;font-size:0.72rem;text-align:center;"
                     title="Max charges (0 = disabled)">
-                  <span style="font-size:0.65rem;color:#2a4a5a;">max (0 = off, restores on long rest)</span>
+                  <span style="font-size:0.65rem;color:#2a4a5a;">max (0 = off)</span>
                 </div>
               ` : ''}
               ${editing ? `
