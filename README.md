@@ -31,14 +31,19 @@ A single-file D&D 5e combat tracker for experienced players. No install, no serv
 - Conditions tracker
 - Immunities & Resistances
 - Optional Senses panel (Truesight, Blindsight, Tremorsense)
+- Conditions reference dropdown (header) — all 15 SRD conditions with mechanical effects
 
 **Inventory**
 - Unified item list — normal items and magic items in one panel
 - Magic items have Equipped and Attuned toggles; Attuned section shows pip display
 - Adjustable attunement slot cap
 - Quantity +/− buttons on all items
-- Collapsible item descriptions with pencil edit
+- Collapsible item descriptions with double-click to edit
 - Currency tracker: PP / GP / SP / CP
+
+**Feats**
+- Collapsible feats list with per-feat expandable descriptions
+- Double-click feat name to rename; double-click description to edit inline
 
 **Combat**
 - Custom Attacks (name, to-hit, damage, notes)
@@ -65,11 +70,6 @@ Built for high-level, high-complexity play where strict level-cap assumptions an
 Class-specific variants (Druid with Wild Shape, etc.) are maintained on separate branches.
 
 ## Upcoming Features
-
-**Next session**
-- Feats section — collapsible list with expandable descriptions, double-click to edit
-- Conditions reference — header dropdown with all 15 SRD conditions and their mechanical effects
-- Double-click to edit item descriptions (removes the extra ✏ button step)
 
 **Planned**
 - Prepared spells — manual spell list folded into the Spell Slots panel, organized by level

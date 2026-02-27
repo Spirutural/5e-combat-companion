@@ -1,5 +1,23 @@
 # Changelog
 
+## v1.2.0 — 2026-02-26
+
+### Feats
+- New **Feats** section in the right panel between Inventory and Skills
+- Add feats by name; expand to view or edit a description
+- Double-click the description or feat name to edit inline
+- Section is independently collapsible; state persists in localStorage
+
+### Conditions Reference
+- **Conditions ▾** dropdown added to the header
+- Lists all 15 SRD conditions (Blinded through Unconscious) with rules-as-written mechanical effects
+- Scrollable, closes on click-outside
+
+### Inventory
+- Item descriptions now support **double-click to edit** — ✏ Edit button removed
+
+---
+
 ## v1.1.0 — 2026-02-26
 
 ### Inventory Consolidation
