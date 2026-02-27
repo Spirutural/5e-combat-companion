@@ -1289,6 +1289,7 @@
       deception: 0, intimidation: 0, performance: 0, persuasion: 0,
     },
     customSkills: [],
+    skillBonuses: {},
   };
 
   const STORAGE_KEY = '5e_tracker_v1';
@@ -1374,6 +1375,7 @@
   if (state.skillsOpen === undefined) state.skillsOpen = true;
   if (!state.skills) state.skills = { ...DEFAULTS.skills };
   if (!state.customSkills) state.customSkills = [];
+  if (!state.skillBonuses) state.skillBonuses = {};
   if (!state.currency) state.currency = { pp: 0, gp: 0, sp: 0, cp: 0 };
   if (!state.hpEffects) state.hpEffects = JSON.parse(JSON.stringify(DEFAULTS.hpEffects));
   if (state.stats.speedSwim === undefined) state.stats.speedSwim = 0;
@@ -2913,14 +2915,24 @@
     update(s => s.customSkills.push({ id: String(Date.now()), name: name.trim(), abilityKey: ab.trim().toLowerCase(), prof: 0 }));
   }
 
-  function skillRow(label, abilityKey, pipState, onPipClick, onRemove) {
+  function setSkillBonus(key, abilityMod, profBonus, pipState) {
+    const current = state.skillBonuses[key] ?? 0;
+    const calcBase = abilityMod + (pipState === 2 ? profBonus * 2 : pipState === 1 ? profBonus : 0);
+    const val = prompt(`Flat bonus for ${key} (added on top of calculated ${calcBase >= 0 ? '+' : ''}${calcBase}):`, current);
+    if (val === null) return;
+    const n = parseInt(val) || 0;
+    update(s => { s.skillBonuses[key] = n; });
+  }
+  function skillRow(label, abilityKey, pipState, onPipClick, onRemove, bonusKey) {
     const abilityScore = state.stats[abilityKey] ?? 10;
     const abilityMod = Math.floor((abilityScore - 10) / 2);
-    const bonus = pipState === 2 ? state.profBonus * 2 : pipState === 1 ? state.profBonus : 0;
-    const total = abilityMod + bonus;
+    const profBonus = pipState === 2 ? state.profBonus * 2 : pipState === 1 ? state.profBonus : 0;
+    const flatBonus = bonusKey ? (state.skillBonuses[bonusKey] ?? 0) : 0;
+    const total = abilityMod + profBonus + flatBonus;
     const sign = total >= 0 ? '+' : '';
     const pipCls = pipState === 2 ? 'expertise' : pipState === 1 ? 'prof' : '';
     const pipTitle = ['Not proficient', 'Proficient', 'Expertise'][pipState];
+    const bonusOnClick = bonusKey ? `setSkillBonus('${bonusKey}',${abilityMod},${state.profBonus},${pipState})` : '';
     return `
       <div class="save-row" style="padding:3px 0;">
         <span style="display:flex;align-items:center;gap:5px;">
@@ -2929,7 +2941,7 @@
           ${onRemove ? `<span style="font-size:0.58rem;color:#2a5a6a;text-transform:uppercase;">${abilityKey}</span>` : ''}
         </span>
         <span style="display:flex;align-items:center;gap:4px;">
-          <span class="stat-value" style="font-size:0.78rem;font-weight:500;">${sign}${total}</span>
+          <span class="stat-value" style="font-size:0.78rem;font-weight:500;${bonusKey ? 'cursor:pointer;' : ''}" ${bonusOnClick ? `onclick="${bonusOnClick}" title="Click to set flat bonus${flatBonus !== 0 ? ' (current: ' + (flatBonus >= 0 ? '+' : '') + flatBonus + ')' : ''}"` : ''}>${sign}${total}${flatBonus !== 0 ? `<span style="font-size:0.65rem;color:#c8904a;margin-left:2px;">${flatBonus >= 0 ? '+' : ''}${flatBonus}</span>` : ''}</span>
           ${onRemove ? `<button onclick="${onRemove}" style="background:none;border:none;color:#2a4a5a;cursor:pointer;font-size:0.75rem;padding:0 2px;" title="Remove">✕</button>` : ''}
         </span>
       </div>
@@ -2939,10 +2951,10 @@
   function renderSkills() {
     const { skills, customSkills, skillsOpen } = state;
     const builtInRows = SKILL_DEFS.map(([label, abilityKey, stateKey]) =>
-      skillRow(label, abilityKey, skills[stateKey] ?? 0, `cycleSkillProf('${stateKey}')`, null)
+      skillRow(label, abilityKey, skills[stateKey] ?? 0, `cycleSkillProf('${stateKey}')`, null, stateKey)
     ).join('');
     const customRows = customSkills.map(sk =>
-      skillRow(sk.name, sk.abilityKey, sk.prof, `cycleCustomSkillProf('${sk.id}')`, `removeCustomSkill('${sk.id}')`)
+      skillRow(sk.name, sk.abilityKey, sk.prof, `cycleCustomSkillProf('${sk.id}')`, `removeCustomSkill('${sk.id}')`, null)
     ).join('');
     return `
       <div style="margin-top:4px;">
