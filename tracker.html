@@ -1142,6 +1142,8 @@
     <div class="panel" id="panel-right">
       <div id="inventory-wrap"></div>
       <hr class="divider">
+      <div id="feats-wrap"></div>
+      <hr class="divider">
       <div id="skills-wrap"></div>
     </div>
   </div>
@@ -2464,6 +2466,56 @@
   function toggleFeatsSection() {
     update(s => s.featsOpen = !s.featsOpen);
   }
+  function renderFeats() {
+    const { feats, featsOpen } = state;
+    return `
+      <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Feats</span>
+        <span style="display:flex;gap:4px;align-items:center;">
+          ${featsOpen ? `<button class="btn-add-inv" style="padding:2px 8px;font-size:0.7rem;" onclick="event.stopPropagation();addFeat()">+ Feat</button>` : ''}
+          <button class="btn-sm" onclick="toggleFeatsSection()" style="padding:0 6px;">${featsOpen ? '▲' : '▼'}</button>
+        </span>
+      </div>
+      ${featsOpen ? `
+        ${feats.length === 0
+          ? '<div style="font-size:0.75rem;color:#2a4a5a;padding:4px 0;">No feats added</div>'
+          : feats.map(f => {
+              const open    = featDescOpen[f.id];
+              const editing = featDescEdit === f.id;
+              return `
+                <div style="padding:4px 0;border-bottom:1px solid #0f2535;">
+                  <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <span style="font-size:0.8rem;color:#8ab8c8;cursor:pointer;"
+                      ondblclick="editFeatName('${f.id}')"
+                      title="Double-click to rename">${f.name}</span>
+                    <span style="display:flex;gap:4px;">
+                      <button class="btn-sm" onclick="toggleFeatDesc('${f.id}')" style="padding:0 5px;">${open ? '▲' : '▼'}</button>
+                      <button class="btn-sm" onclick="removeFeat('${f.id}')" style="padding:0 5px;color:#a05050;">✕</button>
+                    </span>
+                  </div>
+                  ${open ? `
+                    <div style="padding:4px 0 2px 0;">
+                      ${editing ? `
+                        <textarea id="feat-desc-${f.id}"
+                          style="width:100%;min-height:60px;background:#0a1a24;color:#c8dde8;border:1px solid #1a3a4a;border-radius:4px;padding:4px;font-size:0.75rem;font-family:'Inter',sans-serif;resize:vertical;">${f.description}</textarea>
+                        <div style="display:flex;gap:4px;margin-top:4px;">
+                          <button class="edit-save-btn" onclick="saveFeatDesc('${f.id}')">Save</button>
+                          <button class="edit-cancel-btn" onclick="cancelEditFeatDesc()">✕</button>
+                        </div>
+                      ` : `
+                        <div style="font-size:0.75rem;color:#6a9aaa;white-space:pre-wrap;min-height:16px;cursor:text;"
+                          ondblclick="startEditFeatDesc('${f.id}')"
+                          title="Double-click to edit">${f.description || '<em style="color:#2a4a5a;">No description</em>'}</div>
+                      `}
+                    </div>
+                  ` : ''}
+                </div>
+              `;
+            }).join('')
+        }
+      ` : ''}
+    `;
+  }
 
   // === UNIFIED INVENTORY ===
   function renderInventory() {
@@ -2981,6 +3033,7 @@
     renderSlots();
     document.getElementById('attacks-section-wrap').innerHTML = renderAttacks();
     document.getElementById('inventory-wrap').innerHTML = renderInventory();
+    document.getElementById('feats-wrap').innerHTML = renderFeats();
     document.getElementById('skills-wrap').innerHTML = renderSkills();
     applyColWidths();
   }
