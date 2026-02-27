@@ -1635,6 +1635,7 @@
   if (state.stats.speedSwim === undefined) state.stats.speedSwim = 0;
   if (state.stats.speedClimb === undefined) state.stats.speedClimb = 0;
   if (state.stats.speedFly === undefined) state.stats.speedFly = 0;
+  ['savStr','savDex','savCon','savInt','savWis','savCha'].forEach(k => { if (state.stats[k] === undefined) state.stats[k] = 0; });
   if (!state.preparedSpells) state.preparedSpells = [];
   if (state.preparedSpellsOpen === undefined) state.preparedSpellsOpen = true;
   if (!state.loreBook) state.loreBook = [];
@@ -1854,22 +1855,30 @@
       </div>
 
       <hr class="divider">
-      ${sectionTitle('Saves', null)}
+      ${sectionTitle('Saves', 'saves')}
       <div class="saves-grid">
         ${[['STR','str'],['DEX','dex'],['CON','con'],['INT','int'],['WIS','wis'],['CHA','cha']].map(([name, abKey]) => {
+          const savKey = 'sav' + abKey.charAt(0).toUpperCase() + abKey.slice(1);
           const pipState = state.saveProfs[abKey];
           const pipCls = pipState === 2 ? 'expertise' : pipState === 1 ? 'prof' : '';
           const pipTitle = ['Not proficient', 'Proficient', 'Expertise'][pipState];
           const abilityMod = Math.floor(((state.stats[abKey] ?? 10) - 10) / 2);
-          const bonus = pipState === 2 ? state.profBonus * 2 : pipState === 1 ? state.profBonus : 0;
-          const total = abilityMod + bonus;
+          const profBonus = pipState === 2 ? state.profBonus * 2 : pipState === 1 ? state.profBonus : 0;
+          const flatBonus = state.stats[savKey] ?? 0;
+          const total = abilityMod + profBonus + flatBonus;
           const sign = total >= 0 ? '+' : '';
+          if (isSaves) {
+            return `<div class="save-row">
+                <span class="save-name">${name}</span>
+                <input class="edit-input-sm" id="edit-${savKey}" type="number" value="${flatBonus}" style="width:52px;" title="Flat bonus (on top of mod + prof)">
+              </div>`;
+          }
           return `<div class="save-row">
               <span style="display:flex;align-items:center;gap:4px;">
                 <span class="prof-pip ${pipCls}" onclick="cycleSaveProf('${abKey}')" title="${pipTitle}"></span>
                 <span class="save-name">${name}</span>
               </span>
-              <span class="save-val">${sign}${total}</span>
+              <span class="save-val">${sign}${total}${flatBonus !== 0 ? `<span style="font-size:0.65rem;color:#c8904a;margin-left:2px;">${flatBonus >= 0 ? '+' : ''}${flatBonus}</span>` : ''}</span>
             </div>`;
         }).join('')}
       </div>
