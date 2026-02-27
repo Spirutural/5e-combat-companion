@@ -2932,11 +2932,12 @@
     const sign = total >= 0 ? '+' : '';
     const pipCls = pipState === 2 ? 'expertise' : pipState === 1 ? 'prof' : '';
     const pipTitle = ['Not proficient', 'Proficient', 'Expertise'][pipState];
+    const pipStyle = flatBonus !== 0 ? 'background:#a03030;border-color:#c04040;' : '';
     const bonusOnClick = bonusKey ? `setSkillBonus('${bonusKey}',${abilityMod},${state.profBonus},${pipState})` : '';
     return `
       <div class="save-row" style="padding:3px 0;">
         <span style="display:flex;align-items:center;gap:5px;">
-          <span class="prof-pip ${pipCls}" onclick="${onPipClick}" title="${pipTitle}"></span>
+          <span class="prof-pip ${pipCls}" onclick="${onPipClick}" title="${pipTitle}" style="${pipStyle}"></span>
           <span class="save-name" style="font-size:0.7rem;">${label}</span>
           ${onRemove ? `<span style="font-size:0.58rem;color:#2a5a6a;text-transform:uppercase;">${abilityKey}</span>` : ''}
         </span>
