@@ -820,8 +820,18 @@
     }
     .modal-box {
       background: #060f18; border: 1px solid #1a3a4a; border-radius: 8px;
-      padding: 20px; max-width: 600px; width: 95vw;
-      max-height: 80vh; overflow-y: auto;
+      max-width: 600px; width: 95vw; max-height: 80vh;
+      display: flex; flex-direction: column;
+    }
+    .modal-header {
+      flex-shrink: 0; padding: 16px 20px 0;
+    }
+    .modal-body {
+      flex: 1; overflow-y: auto; padding: 0 20px 4px;
+    }
+    .modal-footer {
+      flex-shrink: 0; padding: 10px 20px;
+      border-top: 1px solid #0f2535;
     }
     .modal-title {
       font-family: 'Cinzel', serif; font-size: 1rem; color: #a8d8e8;
@@ -861,7 +871,7 @@
     .school-btn.active { background: #0a1e2a; border-color: #FF4DA6; color: #FF4DA6; }
 
     /* === MANIFEST RESOLVER === */
-    .resolver-box { max-width: 400px; }
+    .resolver-box { max-width: 400px; padding: 20px; }
     .resolver-step { margin-bottom: 16px; }
     .resolver-score {
       font-size: 1.4rem; text-align: center; font-family: 'Cinzel', serif;
@@ -3923,17 +3933,24 @@
     modal.className = 'modal-overlay';
     modal.innerHTML = `
       <div class="modal-box">
-        <div class="modal-title">
-          Manage Powers
-          <button class="modal-close" onclick="closeManagePowers()">✕</button>
+        <div class="modal-header">
+          <div class="modal-title">
+            Manage Powers
+            <button class="modal-close" onclick="closeManagePowers()">✕</button>
+          </div>
+          <input class="modal-search" placeholder="Search powers..."
+            value="${search}" oninput="managePowersSearch(this.value)">
+          <div class="school-filter">
+            <button class="school-btn ${!school ? 'active' : ''}" onclick="managePowersSchool('')">All</button>
+            ${schools.map(s => `<button class="school-btn ${school === s ? 'active' : ''}" onclick="managePowersSchool('${s}')">${s}</button>`).join('')}
+          </div>
         </div>
-        <input class="modal-search" placeholder="Search powers..."
-          value="${search}" oninput="managePowersSearch(this.value)">
-        <div class="school-filter">
-          <button class="school-btn ${!school ? 'active' : ''}" onclick="managePowersSchool('')">All</button>
-          ${schools.map(s => `<button class="school-btn ${school === s ? 'active' : ''}" onclick="managePowersSchool('${s}')">${s}</button>`).join('')}
+        <div class="modal-body">
+          ${byOrder || '<div style="color:#2a5a6a;text-align:center;padding:20px">No powers match</div>'}
         </div>
-        ${byOrder || '<div style="color:#2a5a6a;text-align:center;padding:20px">No powers match</div>'}
+        <div class="modal-footer">
+          <button class="powers-manage-btn" onclick="closeManagePowers()" style="width:100%;margin:0;">Done</button>
+        </div>
       </div>`;
   }
 
