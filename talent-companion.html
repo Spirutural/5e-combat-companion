@@ -2214,10 +2214,12 @@
     `;
   }
 
-  function toggleCharOpen()   { update(s => s.charOpen   = !s.charOpen); }
-  function toggleStatsOpen()  { update(s => s.statsOpen  = !s.statsOpen); }
-  function toggleScoresOpen() { update(s => s.scoresOpen = !s.scoresOpen); }
-  function toggleSavesOpen()  { update(s => s.savesOpen  = !s.savesOpen); }
+  function toggleCharOpen()    { update(s => s.charOpen    = !s.charOpen); }
+  function toggleStatsOpen()   { update(s => s.statsOpen   = !s.statsOpen); }
+  function toggleScoresOpen()  { update(s => s.scoresOpen  = !s.scoresOpen); }
+  function toggleSavesOpen()   { update(s => s.savesOpen   = !s.savesOpen); }
+  function toggleStrainOpen()  { update(s => s.strainOpen  = !s.strainOpen); }
+  function togglePowersOpen()  { update(s => s.powersOpen  = !s.powersOpen); }
   function toggleHitDice() {
     update(s => s.hitDice.open = !s.hitDice.open);
   }
@@ -3799,7 +3801,7 @@
 
     const section = document.getElementById('strain-section');
     if (!section) return;
-    section.innerHTML = sectionTitle('Strain', 'strainOpen', () => update(s => s.strainOpen = !s.strainOpen), strainOpen) + `
+    section.innerHTML = sectionTitle('Strain', 'strainOpen', 'toggleStrainOpen', strainOpen) + `
       ${strainOpen ? `
         <div class="strain-total ${isWarning ? 'warning' : ''}">
           Total Strain: <strong>${total}</strong> / <strong onclick="editStrainMax()" title="Click to edit" style="cursor:pointer;text-decoration:underline dotted;">${strainMax}</strong>
@@ -3872,7 +3874,7 @@
 
     const section = document.getElementById('powers-section');
     if (!section) return;
-    section.innerHTML = sectionTitle('Active Powers', 'powersOpen', () => update(s => s.powersOpen = !s.powersOpen), powersOpen) + `
+    section.innerHTML = sectionTitle('Active Powers', 'powersOpen', 'togglePowersOpen', powersOpen) + `
       ${powersOpen ? `
         <div class="powers-section">
           ${activePowers.length === 0
