@@ -3832,16 +3832,14 @@
     const { knownPowers, concentration, powersOpen } = state;
     const activePowers = POWERS_DATA.filter(p => knownPowers.includes(p.id));
 
-    const cards = activePowers.map(p => {
+    const makeCard = p => {
       const isConc = concentration.includes(p.id);
-      const ordinal = ['', '1st', '2nd', '3rd', '4th', '5th', '6th'][p.order];
       const isOpen = !!powerCardOpen[p.id];
       const desc = POWER_DESCRIPTIONS[p.id] || '';
       const timeLabel = { action: 'Action', bonus: 'Bonus', reaction: 'Reaction', special: 'Special' }[p.manifestTime] || p.manifestTime;
       return `
         <div class="power-card" style="flex-direction:column;align-items:stretch;gap:0;padding:0;">
           <div style="display:flex;align-items:center;gap:6px;padding:7px 8px;cursor:pointer;" onclick="togglePowerCard('${p.id}')">
-            <span class="power-order-badge">${ordinal}</span>
             <span class="power-name">
               ${p.name}
               <span class="power-school">${p.school} · ${timeLabel}${p.concentration ? ' · C' : ''}</span>
@@ -3858,6 +3856,17 @@
               ${desc}
             </div>
           ` : ''}
+        </div>`;
+    };
+
+    const cards = [1, 2, 3, 4, 5, 6].map(order => {
+      const group = activePowers.filter(p => p.order === order);
+      if (!group.length) return '';
+      const ordinal = ['', '1st', '2nd', '3rd', '4th', '5th', '6th'][order];
+      return `
+        <div class="order-group">
+          <div class="order-group-title">${ordinal} Order</div>
+          ${group.map(makeCard).join('')}
         </div>`;
     }).join('');
 
